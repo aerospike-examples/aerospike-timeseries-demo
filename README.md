@@ -29,18 +29,18 @@ This would connect to Google Finance and download data of the last 10 days for t
 
 To read data use this command:
 ```bash
-java -jar target/AeroTimeSeries-1.0.jar -o R -t AAPL -h 127.0.0.1 -s 2015/12/25:11:30 -e 2015/12/29:15:45
+java -jar target/AeroTimeSeries-1.0.jar -o R -t AAPL -h 127.0.0.1 -s 2015/12/28:11:30 -e 2015/12/30:15:45
 ```
 This would retrieve the stock ticker data of Apple stored in Aerospike for the time period mentioned. The start date and end date is to be specified as YYYY/MM/DD:HH:MI. Here Hour is in a 24-hour format. Also remember that stock exchanges work between 09:30 to 16:00 hours.
 
 ###Options
 ```bash
--d,--days <arg>     Number of Days (default: Pre-retrieved 10 days)
--e,--end <arg>      End Date for Query (default: 2015/12/29:15:45)
+-d,--days <arg>     Number of Days (default: from the stocktick.txt file)
+-e,--end <arg>      End Date for Query (default: 2015/12/30:15:45)
 -h,--host <arg>     Server hostname (default: localhost)
 -l,--help             
 -o,--op <arg>       Load or Read Data (default: R)
 -p,--port <arg>     Server port (default: 3000)
--s,--start <arg>    Start Date for Query (default: 2015/12/25:11:30)
--t,--ticker <arg>   Ticker (default: IBM)
+-s,--start <arg>    Start Date for Query (default: 2015/12/28:11:30)
+-t,--ticker <arg>   Ticker (default: AAPL)
 ```

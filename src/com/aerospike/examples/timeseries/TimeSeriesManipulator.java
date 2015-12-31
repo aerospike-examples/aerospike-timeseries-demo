@@ -300,7 +300,7 @@ public class TimeSeriesManipulator {
 			String ticker = cl.getOptionValue("t", "AAPL");
 			String operation = cl.getOptionValue("o", "R");
 			String startDate = cl.getOptionValue("s", "2015/12/28:11:30");
-			String endDate = cl.getOptionValue("e", "2015/12/30:15:30");
+			String endDate = cl.getOptionValue("e", "2015/12/30:15:45");
 			String days = cl.getOptionValue("d");
 			if (cl.hasOption("l")) {
 				formatter.printHelp("java -jar target/AeroTimeSeries-1.0.jar", header, options, null, true);

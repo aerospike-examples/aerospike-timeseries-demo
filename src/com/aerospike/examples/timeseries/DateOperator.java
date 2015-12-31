@@ -42,4 +42,3 @@ public class DateOperator {
 		return diffDays;
 	}
 }
-Status API Training Shop Blog About Pricing

@@ -270,7 +270,8 @@ public class TimeSeriesManipulator {
 
 	}
 	
-	public static void main(String[] args) throws ParseException, FileNotFoundException, IOException, org.apache.commons.cli.ParseException, InterruptedException {
+	public static void main(String[] args) throws ParseException, FileNotFoundException, 
+		IOException, org.apache.commons.cli.ParseException, InterruptedException {
 		try {
 			Options options = new Options();
 			options.addOption("h", "host", true, "Server hostname (default: localhost)");
@@ -304,7 +305,8 @@ public class TimeSeriesManipulator {
 			}
 			else {
 				int port = Integer.parseInt(portString);
-				TimeSeriesManipulator ts = new TimeSeriesManipulator(host, port, ticker, startDate, endDate, operation, days);
+				TimeSeriesManipulator ts = new TimeSeriesManipulator(host, port, ticker, startDate, 
+									endDate, operation, days);
 				ts.run();
 			}
 		} catch (Exception ex) {

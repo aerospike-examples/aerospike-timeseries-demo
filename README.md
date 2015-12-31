@@ -4,10 +4,10 @@
 Storage and retrieval of Tick Data in a performant way is a very critical aspect of any Market Data Solution. These solutions bottleneck on Performance because of scalability and efficiency issues with the overall application stack, more specifically at the Database level. 
 
 ##Solution
-Aerospike has always been ideal for Low Latency and High Throughput use cases. With the new List API in the 3.7 release of Aerospike, it is now possible to achieve the same performance goals in a time-series use case where manipulation and retrieval of data within Lists becomes very critical.
+Aerospike has always been ideal for Low Latency and High Throughput use cases. With the new List API in the 3.7 release of Aerospike, it is now possible to achieve the same performance goals in a time-series use cases where manipulation and retrieval of data within Lists becomes very critical.
 
 ##Schema Design
-Specific Ticker Stock data for a day is stored in a single Aerospike record. As an example all the data in a dat for a particular Ticker, such as AAPL, is stored in a single record. The next day's data for AAPL is stored in another record. The data is stored inside the record as a list, where the position of each incoming data point in the list, is based on it's specific time-stamp. 
+Specific Ticker Stock data for a day is stored in a single Aerospike record. As an example all the data in a day for a particular Ticker, such as AAPL, is stored in a single record. The next day's data for AAPL is stored in another record. The data is stored inside the record as a list, where the position of each incoming data point in the list, is based on it's specific time-stamp. 
 
 +-----------------------------------+
 
@@ -26,7 +26,7 @@ Where the three data points are for 9:30 AM, 9:31 AM and 9:32 AM for Example
 ###How to build
 The source code for this solution is available on GitHub at https://github.com/aerospike/aerospike-timeseries-demo 
 
-This example requires the 3.7 release of Aerospike and a working Java development environment (Java 6 and above) including Maven (Maven 2). The Aerospike Java client will be downloaded from Maven Central as part of the build.
+This example requires 3.7 release of Aerospike and a working Java development environment (Java 6 and above) including Maven (Maven 2). The Aerospike Java client will be downloaded from Maven Central as part of the build.
 
 After cloning the repository, use maven to build the jar files. From the root directory of the project, issue the following command:
 ```bash

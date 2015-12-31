@@ -35,12 +35,12 @@ This would retrieve the stock ticker data of Apple stored in Aerospike for the t
 
 ###Options
 ```bash
--d,--days <arg>         Number of Days (default: Pre-retrieved 10 days)
--e,--enddate <arg>      End Date for Query (default: 2015/12/23 16:00)
--h,--host <arg>         Server hostname (default: localhost)
+-d,--days <arg>     Number of Days (default: Pre-retrieved 10 days)
+-e,--end <arg>      End Date for Query (default: 2015/12/29:15:45)
+-h,--host <arg>     Server hostname (default: localhost)
 -l,--help             
--o,--operation <arg>    Load or Read Data (default: R)
--p,--port <arg>         Server port (default: 3000)
--s,--startdate <arg>    Start Date for Query (default: 2015/12/22 09:30)
--t,--ticker <arg>       Ticker (default: IBM)
+-o,--op <arg>       Load or Read Data (default: R)
+-p,--port <arg>     Server port (default: 3000)
+-s,--start <arg>    Start Date for Query (default: 2015/12/25:11:30)
+-t,--ticker <arg>   Ticker (default: IBM)
 ```

@@ -44,7 +44,6 @@ public class TimeSeriesManipulator {
 	private String endString;
 	private String operation;
 	private String days;
-	private double[] plotVal;
 	private int port;
 
 	public TimeSeriesManipulator (String host, int port, String ticker, 
@@ -65,7 +64,6 @@ public class TimeSeriesManipulator {
 		this.endString = endDate;
 		this.operation = operation;
 		this.days = days;
-		this.plotVal = new double[1000];
 
 	}
 
@@ -138,27 +136,25 @@ public class TimeSeriesManipulator {
 			if (records[recLength] != null) {
 				list = (List<Double>) records[recLength].getList("stock");
 				for (int j=0; j<list.size(); j++) {
-					if ((recLength == 0 && j >= startIndex) ||
-							(recLength == length-1 && j<= endIndex)) {
+					if (j >= startIndex && j<= endIndex && (recLength == 0 ||
+							recLength == length-1 )) {
 						if (list.get(j) != null) {
 							if (daySize > 1) {
 								count++;
-								this.plotVal[j] = list.get(j);
 								sum = sum+list.get(j);
 								if (list.get(j) > max) max = list.get(j);
 								if (list.get(j) < min) min = list.get(j);
 							} else if (j<= endIndex){
 								count++;
-								this.plotVal[j] = list.get(j);
 								sum = sum+list.get(j);
 								if (list.get(j) > max) max = list.get(j);
 								if (list.get(j) < min) min = list.get(j);
 							}
 						}
 					}
-					else if (recLength >0 && recLength < length -1 && list.get(j) != null)  {
+					else if (recLength >0 && recLength < length -1 && list.get(j) != null
+							&& j >= startIndex && j<= endIndex)  {
 						count++;
-						this.plotVal[j] = list.get(j);
 						sum = sum+list.get(j);
 						if (list.get(j) > max) max = list.get(j);
 						if (list.get(j) < min) min = list.get(j);

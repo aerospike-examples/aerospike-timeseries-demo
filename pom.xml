@@ -4,6 +4,24 @@
 	<groupId>Aerospike-timeseries-example</groupId>
 	<artifactId>AeroTimeSeries</artifactId>
 	<version>1.0</version>
+	<organization>
+		<name>Aerospike Inc.</name>
+		<url>http://www.aerospike.com</url>
+	</organization>
+	<developers>
+		<developer>
+			<id>Aveekshith Bushan</id>
+			<name>Aveekshith Bushan</name>
+			<email>aveekshith@aerospike.com</email>
+			<url>http://www.aerospike.com</url>
+			<organization>Aerospike Inc.</organization>
+			<organizationUrl>http://www.aerospike.com</organizationUrl>
+			<roles>
+				<role>Solutions Architect</role>
+			</roles>
+			<timezone>+5:30</timezone>
+		</developer>
+	</developers>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<plugins>
@@ -27,6 +45,8 @@
 							<mainClass>com.aerospike.examples.timeseries.TimeSeriesManipulator</mainClass>
 						</manifest>
 					</archive>
+					<finalName>${project.artifactId}-${project.version}</finalName>
+					<appendAssemblyId>false</appendAssemblyId>
 				</configuration>
 				<executions>
 					<execution>
@@ -51,11 +71,6 @@
 			<groupId>com.aerospike</groupId>
 			<artifactId>aerospike-client</artifactId>
 			<version>3.1.8</version>
-		</dependency>
-		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-			<version>20151123</version>
 		</dependency>
 	</dependencies>
 </project>

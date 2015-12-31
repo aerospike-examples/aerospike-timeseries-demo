@@ -25,7 +25,7 @@ To load data use this command:
 ```bash
 java -jar target/AeroTimeSeries-1.0.jar -o L -t AAPL -d 10 -h 127.0.0.1
 ```
-This would connect to Google Finance and download data of the last 10 days for the Stock Ticker of Apple. In case there is no internet connection available, one can manually download the data from Google Finance (http://www.google.com/finance/getprices?i=[PERIOD]&p=[DAYS]d&f=d,o,h,l,c,v&df=cpct&q=[TICKER]) and populate the file stocktick.txt without specifyint the -d option
+This would connect to Google Finance and download data of the last 10 days for the Stock Ticker of Apple. In case there is no internet connection available, one can manually download the data from Google Finance (http://www.google.com/finance/getprices?i=[PERIOD]&p=[DAYS]d&f=d,o,h,l,c,v&df=cpct&q=[TICKER]) and populate the file stocktick.txt without specifying the -d option
 
 To read data use this command:
 ```bash

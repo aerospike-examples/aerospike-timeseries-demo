@@ -4,7 +4,7 @@
 Storage and retrieval of Tick Data in a performant way is a very critical aspect of any Market Data Solution. These solutions bottleneck on Performance because of scalability and efficiency issues with the overall application stack, more specifically at the Database level. 
 
 ##Solution
-Aerospike has always been ideal for Low Latency and High Throughput use cases. With the new List API in the 3.7 release of Aerospike, it is now possible to achieve the same performance goals in a time-series use cases where manipulation and retrieval of data within Lists becomes very critical.
+Aerospike has always been ideal for Low Latency and High Throughput use cases. With the new List API in the 3.7 release of Aerospike, it is now possible to achieve the same performance goals in time-series use cases where manipulation and retrieval of data within Lists becomes very critical.
 
 ###Schema Design
 Specific Ticker Stock data for a day is stored in a single Aerospike record. As an example all the data in a day for a particular Ticker, such as AAPL, is stored in a single record. The next day's data for AAPL is stored in another record. The data is stored inside the record as a list, where the position of each incoming data point in the list, is based on it's specific time-stamp. 

@@ -9,7 +9,7 @@ Aerospike has always been ideal for Low Latency and High Throughput use cases. W
 ##Schema Design
 Specific Ticker Stock data for a day is stored in a single Aerospike record. As an example all the data in a day for a particular Ticker, such as AAPL, is stored in a single record. The next day's data for AAPL is stored in another record. The data is stored inside the record as a list, where the position of each incoming data point in the list, is based on it's specific time-stamp. 
 
-![ScanJob] (console.jpg)
+![ScanJob] (console.png)
 +-----------------------------------+
 
 | stock 

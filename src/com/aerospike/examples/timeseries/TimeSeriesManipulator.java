@@ -280,9 +280,9 @@ public class TimeSeriesManipulator {
 			options.addOption("h", "host", true, "Server hostname (default: localhost)");
 			options.addOption("p", "port", true, "Server port (default: 3000)");
 			options.addOption("t", "ticker", true, "Ticker (default: IBM)");
-			options.addOption("o", "operation", true, "Load or Read Data (default: R)");
-			options.addOption("s", "start date", true, "Start Date for Query (default: 2015/12/22 09:30)");
-			options.addOption("e", "end date", true, "End Date for Query (default: 2015/12/23 16:00)");
+			options.addOption("o", "op", true, "Load or Read Data (default: R)");
+			options.addOption("s", "start", true, "Start Date for Query (default: 2015/12/22 09:30)");
+			options.addOption("e", "end", true, "End Date for Query (default: 2015/12/23 16:00)");
 			options.addOption("d", "days", true, "Number of Days (default: Pre-retrieved 10 days)");
 
 			options.addOption(OptionBuilder.withLongOpt("help").create('l'));

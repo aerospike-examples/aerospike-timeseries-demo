@@ -279,15 +279,15 @@ public class TimeSeriesManipulator {
 			Options options = new Options();
 			options.addOption("h", "host", true, "Server hostname (default: localhost)");
 			options.addOption("p", "port", true, "Server port (default: 3000)");
-			options.addOption("t", "ticker", true, "Ticker (default: IBM)");
+			options.addOption("t", "ticker", true, "Ticker (default: AAPL)");
 			options.addOption("o", "op", true, "Load or Read Data (default: R)");
-			options.addOption("s", "start", true, "Start Date for Query (default: 2015/12/22 09:30)");
-			options.addOption("e", "end", true, "End Date for Query (default: 2015/12/23 16:00)");
-			options.addOption("d", "days", true, "Number of Days (default: Pre-retrieved 10 days)");
+			options.addOption("s", "start", true, "Start Date for Query (default: 2015/12/28:11:30)");
+			options.addOption("e", "end", true, "End Date for Query (default: 2015/12/30:15:45)");
+			options.addOption("d", "days", true, "Number of Days (default: from the stocktick.txt file)");
 
 			options.addOption(OptionBuilder.withLongOpt("help").create('l'));
 
-			String header = "Options while running the Jar\n\n";
+			String header = "Options\n\n";
 			//String footer = "\nPlease report issues aveekshith@aerospike.com";
 
 			HelpFormatter formatter = new HelpFormatter();
@@ -297,13 +297,13 @@ public class TimeSeriesManipulator {
 	
 			String host = cl.getOptionValue("h", "127.0.0.1");
 			String portString = cl.getOptionValue("p", "3000");
-			String ticker = cl.getOptionValue("t", "IBM");
+			String ticker = cl.getOptionValue("t", "AAPL");
 			String operation = cl.getOptionValue("o", "R");
-			String startDate = cl.getOptionValue("s", "2015/12/22:09:30");
-			String endDate = cl.getOptionValue("e", "2015/12/23:16:00");
+			String startDate = cl.getOptionValue("s", "2015/12/28:11:30");
+			String endDate = cl.getOptionValue("e", "2015/12/30:15:30");
 			String days = cl.getOptionValue("d");
 			if (cl.hasOption("l")) {
-				formatter.printHelp("java -jar target/AeroTimeSeries-1.0-jar-with-dependencies.jar", header, options, null, true);
+				formatter.printHelp("java -jar target/AeroTimeSeries-1.0.jar", header, options, null, true);
 				System.exit(0);
 			}
 			else {

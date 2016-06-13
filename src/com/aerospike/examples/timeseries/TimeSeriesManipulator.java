@@ -108,7 +108,7 @@ public class TimeSeriesManipulator {
 		String[] list = parse (tsValue);
 		int index = 0;
 		if (list[0].startsWith("a")) {
-			System.out.println("Inserting Data for Date: "+insertDate + " with Primary Key: "+pk);
+			System.out.println("Inserting Data for Date: "+dateOp.dateFormatter(insertDate) + " with Primary Key: "+pk);
 			index = 0;
 		}
 		else index = new Integer(list[0]).intValue();
@@ -180,6 +180,7 @@ public class TimeSeriesManipulator {
 				    }
 				}	
 		    }
+			System.out.println("****************************************");
 			System.out.println("Loading Complete");
 			System.out.println("****************************************");
 		}

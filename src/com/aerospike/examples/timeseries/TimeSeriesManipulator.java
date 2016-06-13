@@ -113,7 +113,6 @@ public class TimeSeriesManipulator {
 		}
 		else index = new Integer(list[0]).intValue();
 		double stockTickVal = new Double(list[1]).doubleValue();
-		System.out.println(tsValue+"--->"+stockTickVal);
 		Bin sumBin = new Bin("sum", stockTickVal);
 		Bin countBin = new Bin("count", 1);
 		record = client.operate(wPolicy, key, 

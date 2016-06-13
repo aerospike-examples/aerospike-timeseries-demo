@@ -114,11 +114,10 @@ public class TimeSeriesManipulator {
 		else index = new Integer(list[0]).intValue();
 		double stockTickVal = new Double(list[1]).doubleValue();
 		Bin sumBin = new Bin("sum", stockTickVal);
-		Bin countBin = new Bin("count", 1);
 		record = client.operate(wPolicy, key, 
 					MapOperation.put(mPolicy, "stock", Value.get(index), Value.get(stockTickVal)),
-					Operation.add(sumBin),
-					Operation.add(countBin));	
+					Operation.add(sumBin));
+		
 	}
 
 	
@@ -227,7 +226,7 @@ public class TimeSeriesManipulator {
 		int i=0;
 		Date printDate, insertDate;
 		Double sum = new Double(0);
-		Long count = new Long(0);
+		Long count = new Long (0);
 		Double startVal = new Double (0);
 		Double endVal = new Double (0);
 		Key key = new Key("test", "summary", 10);
@@ -246,12 +245,13 @@ public class TimeSeriesManipulator {
 					MapOperation.getByIndex("stock", 0, MapReturnType.VALUE),
 					MapOperation.getByIndex("stock", -1, MapReturnType.VALUE),
 					Operation.get("sum"),
-					Operation.get("count"));
+					MapOperation.size("stock"));
 			if (record != null)
 				{
 					ArrayList<Double> outList= (ArrayList<Double>) record.getList("stock");
 					sum = sum+(Double) record.getValue("sum");
-					count = count+(Long) record.getValue("count");
+					Object countTemp = outList.get(6);
+					count = count+(Long)countTemp;
 					if (!firstRec) {
 						startVal = outList.get(4);
 						firstRec = true;

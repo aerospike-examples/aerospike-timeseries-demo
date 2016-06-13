@@ -33,10 +33,25 @@ public class DateOperator {
 	public String getPrevDate (String days) throws ParseException {
 		this.cal = GregorianCalendar.getInstance();
 		int x = new Integer(days).intValue();
-		cal.add( Calendar.DAY_OF_YEAR, -x);
+		Calendar tempCal = GregorianCalendar.getInstance();
+		int y=1;
+		int count = 0;
+		while (y<x) {
+			tempCal.add(Calendar.DAY_OF_YEAR, -1);
+			if(isWeekEnd(tempCal.get(Calendar.DAY_OF_WEEK))) {
+	            ++count;
+
+	         }
+			y++;
+		}
+		y=x+count;
+		cal.add( Calendar.DAY_OF_YEAR, -y);
 	    SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy");
 	    String date = df.format(cal.getTime());
 		return date;
+	}
+	public static boolean isWeekEnd(int dayOfWeek) {
+	    return ((dayOfWeek == Calendar.SATURDAY) || (dayOfWeek == Calendar.SUNDAY));
 	}
 	
 	public String getCurrentDate () throws ParseException {

@@ -7,9 +7,13 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 public class DateOperator {
+	Calendar cal;
+	
+	public DateOperator () {
+		this.cal = GregorianCalendar.getInstance();
+	}
 
 	public Date getDate(Date tsDate) throws ParseException {
-		//System.out.println(tsDate);
 	    Calendar cal = Calendar.getInstance();
 	    cal.setTime(tsDate);
 	    cal.set(Calendar.HOUR_OF_DAY, 0);
@@ -19,9 +23,31 @@ public class DateOperator {
 	    Date dateWithoutTime = cal.getTime();
 	    return dateWithoutTime;
 	}
+	public String dateFormatter(Date tsDate) throws ParseException {
+		this.cal = GregorianCalendar.getInstance();
+	    SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+	    String date = df.format(tsDate);
+		return date;
+	}
 	
+	public String getPrevDate (String days) throws ParseException {
+		this.cal = GregorianCalendar.getInstance();
+		int x = new Integer(days).intValue();
+		cal.add( Calendar.DAY_OF_YEAR, -x);
+	    SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+	    String date = df.format(cal.getTime());
+		return date;
+	}
+	
+	public String getCurrentDate () throws ParseException {
+		this.cal = GregorianCalendar.getInstance();
+	    SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+	    String date = df.format(cal.getTime());
+		return date;
+	}
+
 	public Date addDate(Date tsDate) throws ParseException {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 	    Date dateWithoutTime = sdf.parse(sdf.format(tsDate));
 	    Calendar cal = Calendar.getInstance();
 	    cal.setTime(dateWithoutTime);

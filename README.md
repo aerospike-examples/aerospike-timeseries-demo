@@ -44,12 +44,12 @@ java -jar target/AeroTimeSeries-1.0.jar -o LR -t AAPL -h 127.0.0.1 -d 20
 
 ###Options
 ```bash
--d,--days <arg>     Number of Days (default: from the stocktick.txt file)
--e,--end <arg>      End Date for Query (default: 2015/12/30:15:45)
+-d,--days <arg>     Number of Days (default: load data from the stocktick.txt file)
+-e,--end <arg>      End Date for Query (format: dd/MM/yyyy)
 -h,--host <arg>     Server hostname (default: localhost)
 -l,--help             
 -o,--op <arg>       Load or Read Data (default: R)
 -p,--port <arg>     Server port (default: 3000)
--s,--start <arg>    Start Date for Query (default: 2015/12/28:11:30)
+-s,--start <arg>    Start Date for Query (format: dd/MM/yyyy)
 -t,--ticker <arg>   Ticker (default: AAPL)
 ```

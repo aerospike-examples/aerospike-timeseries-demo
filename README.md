@@ -1,10 +1,10 @@
-#How to easily build a Time-Series Application using Aerospike's Sorted Map API
+#How to easily build a Time-Series Application using Aerospike's API
 
 ## Problem
 Storage of Tick Data in an efficient way is a very critical aspect of any Market Data Solution. Also, efficient retrieval of not just this data but also data such as top stocks in the period in an efficient manner becomes very important. 
 
 ##Solution
-Aerospike has always been ideal for Low Latency and High Throughput use cases. With the new Sorted Maps API in the 3.8 release of Aerospike, it is now possible to achieve the same performance goals in time-series use cases where manipulation and retrieval of data becomes very efficient.
+Aerospike has always been ideal for Low Latency and High Throughput use cases. With the new API in the 3.8.3 release of Aerospike, it is now possible to achieve the same performance goals in time-series use cases where manipulation and retrieval of data becomes very efficient.
 
 ###Schema Design
 Specific Ticker Stock data for a day is stored in a single Aerospike record. As an example all the data in a day for a particular Ticker, such as AAPL, is stored in a single record. The next day's data for AAPL is stored in another record. The data is stored inside the record as a list, where the position of each incoming data point in the list, is based on it's specific time-stamp. 

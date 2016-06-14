@@ -98,7 +98,7 @@ public class TimeSeriesManipulator {
 		String[] list = timeParser.parse (tsValue);
 		int index = 0;
 		if (list[0].startsWith("a")) {
-			System.out.println("Inserting Data for Date: "+insertDate + " with Primary Key: "+pk);
+			System.out.println("Inserting Data for "+dateOp.dateFormatter(insertDate) + " with Primary Key: "+pk);
 			index = 0;
 		}
 		else index = new Integer(list[0]).intValue();
@@ -217,7 +217,7 @@ public class TimeSeriesManipulator {
 		// TODO Auto-generated method stub
 		Record[] records;
 		String pk;
-		System.out.println("testing");
+
 		int size = dateList.size();
 		Key[] keys = new Key[size];
 		Long count = new Long (0);
@@ -258,9 +258,7 @@ public class TimeSeriesManipulator {
 									Value.get(pk), Value.get(outList.get(0))),
 							MapOperation.put(mPolicy, "min", 
 									Value.get(pk), Value.get(outList.get(2))));
-//					Record recMin = client.operate(wPolicy, key, 
-//							);
-					System.out.println(formattedDate+" for Stock "+ticker+
+					System.out.println("Reading Data for " + formattedDate + " with Primary Key: " + pk +
 							": MaxValue: "+Double.parseDouble(new DecimalFormat("##").format(outList.get(0)))+
 							" Index:"+outList.get(1)+
 							": MinValue: "+Double.parseDouble(new DecimalFormat("##").format(outList.get(2)))+
@@ -339,9 +337,7 @@ public class TimeSeriesManipulator {
 									Value.get(pk), Value.get(outList.get(0))),
 							MapOperation.put(mPolicy, "min", 
 									Value.get(pk), Value.get(outList.get(2))));
-//					Record recMin = client.operate(wPolicy, key, 
-//							);
-					System.out.println(formattedDate+" for Stock "+ticker+
+					System.out.println("Reading Data for " + formattedDate + " with Primary Key: " + pk +
 							": MaxValue: "+Double.parseDouble(new DecimalFormat("##").format(outList.get(0)))+
 							" Index:"+outList.get(1)+
 							": MinValue: "+Double.parseDouble(new DecimalFormat("##").format(outList.get(2)))+

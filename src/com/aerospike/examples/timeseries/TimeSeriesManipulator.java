@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Random;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -52,12 +53,14 @@ public class TimeSeriesManipulator {
 	private int port;
 	private MapPolicy mPolicy;
 	private boolean firstRec;
+	private Parser timeParser;
 
 
 	public TimeSeriesManipulator (String host, int port, String ticker, 
 			String startDate, String endDate, String operation, String days) {
 		this.port = port;
-		String[] hostArr = parse(host);
+		timeParser = new Parser();
+		String[] hostArr = timeParser.parse(host);
 		Host[] hosts = new Host[hostArr.length];
 		for (int i=0; i<hostArr.length;i++) {
 			hosts[i] = new Host(hostArr[i], this.port);
@@ -83,21 +86,6 @@ public class TimeSeriesManipulator {
         return in;
     }
     
-	public static String[] parse(String tsValue) {
-		String delims = "[,]";
-		String[] tokens = tsValue.split(delims);
-		return tokens;
-	}
-		
-	public static int[] getCalDate(String tsValue) {
-		String delims = "[/]";
-		String[] tokenStr = tsValue.split(delims);
-		int[] tokens = new int[5];
-		for (int i=0; i<tokenStr.length; i++) {
-			tokens[i] = new Integer(tokenStr[i]).intValue();
-		}
-		return tokens;
-	}
 	
 	public void updateTimeSeries (String ticker, Date date, String tsValue) throws ParseException {
 		Record record;
@@ -105,7 +93,7 @@ public class TimeSeriesManipulator {
 		String pk = ticker+insertDate.getTime();
 		
 		Key key = new Key("test", "timeseries", pk);
-		String[] list = parse (tsValue);
+		String[] list = timeParser.parse (tsValue);
 		int index = 0;
 		if (list[0].startsWith("a")) {
 			System.out.println("Inserting Data for Date: "+dateOp.dateFormatter(insertDate) + " with Primary Key: "+pk);
@@ -126,9 +114,7 @@ public class TimeSeriesManipulator {
 		Date formattedDate=new Date();
 		String[] tokens;
 		long token;
-		int count =0;
 		if (this.operation.contains("L")) {
-			count++;
 		    System.out.println("****************************************");
 		    System.out.println("Loading Data");
 		    System.out.println("****************************************");
@@ -139,7 +125,7 @@ public class TimeSeriesManipulator {
 				    while ((line = br.readLine()) != null) {
 				    	//System.out.println(line);
 				    	if (line.startsWith("a")) {
-				    		tokens = parse(line);
+				    		tokens = timeParser.parse(line);
 				    		token = new Long(tokens[0].substring(1)).longValue()*1000L;
 				    		cal.setTimeInMillis(token);
 				    		formattedDate = cal.getTime();
@@ -162,7 +148,7 @@ public class TimeSeriesManipulator {
 				    String line;
 				    while ((line = br.readLine()) != null) {
 				    	if (line.startsWith("a")) {
-				    		tokens = parse(line);
+				    		tokens = timeParser.parse(line);
 				    		token = new Long(tokens[0].substring(1)).longValue()*1000L;
 				    		cal.setTimeInMillis(token);
 				    		formattedDate = cal.getTime();
@@ -186,10 +172,11 @@ public class TimeSeriesManipulator {
 		}
 		Calendar startCal = Calendar.getInstance();
 		Calendar endCal = Calendar.getInstance();
+		int count =0;
 		if (this.operation.contains("R")) {
 			count++;
 	
-			int[] startList = this.getCalDate(this.startString);
+			int[] startList = timeParser.getCalDate(this.startString);
 			if (startList [0] >0 && startList[1] > 0 && startList[2]>0) {
 					startCal = new GregorianCalendar(startList[2],
 							startList[1]-1,startList[0]);
@@ -198,7 +185,7 @@ public class TimeSeriesManipulator {
 				System.out.println("Invalid Start Date Format. Specify as dd/MM/yyyy");
 				System.exit(0);
 			}
-			int[] endList = this.getCalDate(this.endString);
+			int[] endList = timeParser.getCalDate(this.endString);
 			if (endList [0] >0 && endList[1] > 0 && endList[2]>0) {
 				endCal = new GregorianCalendar(endList[2],
 					endList[1]-1,endList[0]);
@@ -230,7 +217,9 @@ public class TimeSeriesManipulator {
 		Long count = new Long (0);
 		Double startVal = new Double (0);
 		Double endVal = new Double (0);
-		Key key = new Key("test", "summary", 10);
+		Random rand = new Random();
+		long randomNum = 0 + rand.nextInt((1000000 - 0) + 1);
+		Key key = new Key("test", "summary", randomNum);
 		while (!date.after(endDate)) {
 			
 			insertDate = dateOp.getDate(date);
@@ -282,6 +271,7 @@ public class TimeSeriesManipulator {
 					MapOperation.getByRank("min", 0, MapReturnType.VALUE));
 			System.out.println("****************************************");
 			System.out.println("*********** "+ticker+" Summary ***************");
+			System.out.println("To get the following report in AQL, run - select * from test.summary where pk= "+randomNum);
 			System.out.println("****************************************");
 			System.out.println("Sum: " + Double.parseDouble(new DecimalFormat("##.##").format(sum)) +
 					"\nCount: " + Double.parseDouble(new DecimalFormat("##").format(count)) +

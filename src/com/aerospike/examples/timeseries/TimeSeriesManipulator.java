@@ -54,6 +54,7 @@ public class TimeSeriesManipulator {
 	private MapPolicy mPolicy;
 	private boolean firstRec;
 	private Parser timeParser;
+	private ArrayList<Long> dateList;
 
 
 	public TimeSeriesManipulator (String host, int port, String ticker, 
@@ -76,6 +77,7 @@ public class TimeSeriesManipulator {
 		this.days = days;
 		this.mPolicy = new MapPolicy(MapOrder.KEY_VALUE_ORDERED, MapWriteMode.CREATE_ONLY);
 		this.firstRec = false;
+		this.dateList = new ArrayList <Long> ();
 	}
 
     public BufferedReader getStocks(String days, String ticker) throws IOException {
@@ -96,7 +98,7 @@ public class TimeSeriesManipulator {
 		String[] list = timeParser.parse (tsValue);
 		int index = 0;
 		if (list[0].startsWith("a")) {
-			System.out.println("Inserting Data for Date: "+dateOp.dateFormatter(insertDate) + " with Primary Key: "+pk);
+			System.out.println("Inserting Data for Date: "+insertDate + " with Primary Key: "+pk);
 			index = 0;
 		}
 		else index = new Integer(list[0]).intValue();
@@ -111,7 +113,7 @@ public class TimeSeriesManipulator {
 	
 	public void run() throws ParseException, FileNotFoundException, IOException, InterruptedException {
 		GregorianCalendar cal = new GregorianCalendar();
-		Date formattedDate=new Date();
+		//String formattedDate = new String();
 		String[] tokens;
 		long token;
 		if (this.operation.contains("L")) {
@@ -121,15 +123,15 @@ public class TimeSeriesManipulator {
 		    if (this.days != null) {
 				try (BufferedReader br = getStocks(this.days, this.ticker)) {
 				    String line;
-				   // Thread.sleep(5000);
 				    while ((line = br.readLine()) != null) {
-				    	//System.out.println(line);
 				    	if (line.startsWith("a")) {
 				    		tokens = timeParser.parse(line);
 				    		token = new Long(tokens[0].substring(1)).longValue()*1000L;
 				    		cal.setTimeInMillis(token);
-				    		formattedDate = cal.getTime();
-				    		this.updateTimeSeries(this.ticker, formattedDate, line);
+				    		//formattedDate = dateOp.dateFormatter(cal.getTime());
+				    		this.updateTimeSeries(this.ticker, cal.getTime(), line);
+				    		Date insertDate = dateOp.getDate(cal.getTime());
+				    		this.dateList.add(insertDate.getTime());
 				    	}
 				    	else if ((!line.startsWith("EXCHANGE")) && 
 				    			(!line.startsWith("MARKET")) &&
@@ -137,7 +139,7 @@ public class TimeSeriesManipulator {
 				    							(!line.startsWith("COLUMNS")) &&
 				    									(!line.startsWith("DATA")) &&
 				    											(!line.startsWith("TIMEZONE"))) {
-				    					this.updateTimeSeries(this.ticker, formattedDate, line);
+				    					this.updateTimeSeries(this.ticker, cal.getTime(), line);
 		
 				    	}
 				    }
@@ -151,8 +153,9 @@ public class TimeSeriesManipulator {
 				    		tokens = timeParser.parse(line);
 				    		token = new Long(tokens[0].substring(1)).longValue()*1000L;
 				    		cal.setTimeInMillis(token);
-				    		formattedDate = cal.getTime();
-				    		this.updateTimeSeries(this.ticker, formattedDate, line);
+				    		//formattedDate = dateOp.dateFormatter(cal.getTime());
+				    		Date insertDate = dateOp.getDate(cal.getTime());
+				    		this.dateList.add(insertDate.getTime());
 				    	}
 				    	else if ((!line.startsWith("EXCHANGE")) && 
 				    			(!line.startsWith("MARKET")) &&
@@ -160,7 +163,7 @@ public class TimeSeriesManipulator {
 				    							(!line.startsWith("COLUMNS")) &&
 				    									(!line.startsWith("DATA")) &&
 				    											(!line.startsWith("TIMEZONE"))) {
-				    					this.updateTimeSeries(this.ticker, formattedDate, line);
+				    					this.updateTimeSeries(this.ticker, cal.getTime(), line);
 		
 				    	}
 				    }
@@ -174,34 +177,118 @@ public class TimeSeriesManipulator {
 		Calendar endCal = Calendar.getInstance();
 		int count =0;
 		if (this.operation.contains("R")) {
-			count++;
-	
-			int[] startList = timeParser.getCalDate(this.startString);
-			if (startList [0] >0 && startList[1] > 0 && startList[2]>0) {
-					startCal = new GregorianCalendar(startList[2],
-							startList[1]-1,startList[0]);
+			if (this.operation.contains("L")) {
+				count++;
+				this.retrieveResult(this.ticker, this.dateList);
 			}
 			else {
-				System.out.println("Invalid Start Date Format. Specify as dd/MM/yyyy");
-				System.exit(0);
+				count++;
+		
+				int[] startList = timeParser.getCalDate(this.startString);
+				if (startList [0] >0 && startList[1] > 0 && startList[2]>0) {
+						startCal = new GregorianCalendar(startList[2],
+								startList[1]-1,startList[0]);
+				}
+				else {
+					System.out.println("Invalid Start Date Format. Specify as dd/MM/yyyy");
+					System.exit(0);
+				}
+				int[] endList = timeParser.getCalDate(this.endString);
+				if (endList [0] >0 && endList[1] > 0 && endList[2]>0) {
+					endCal = new GregorianCalendar(endList[2],
+						endList[1]-1,endList[0]);
+				}
+				else {
+					System.out.println("Invalid End Date Format. Specify as dd/MM/yyyy");
+					System.exit(0);
+				}
+				if (!endCal.before(startCal)) 
+					this.retrieveResult(this.ticker, startCal.getTime(), endCal.getTime());	
+				else System.out.println("Invalid Dates. Start Date is greater than End Date");
 			}
-			int[] endList = timeParser.getCalDate(this.endString);
-			if (endList [0] >0 && endList[1] > 0 && endList[2]>0) {
-				endCal = new GregorianCalendar(endList[2],
-					endList[1]-1,endList[0]);
-			}
-			else {
-				System.out.println("Invalid End Date Format. Specify as dd/MM/yyyy");
-				System.exit(0);
-			}
-			if (!endCal.before(startCal)) 
-				this.retrieveResult(this.ticker, startCal.getTime(), endCal.getTime());	
-			else System.out.println("Invalid Dates. Start Date is greater than End Date");
 
 			
 		}
 		if (count==0) System.out.println("Invalid Operation. Use L or R");
 
+	}
+	
+	private void retrieveResult(String ticker, ArrayList <Long> dateList) throws ParseException {
+		// TODO Auto-generated method stub
+		Record[] records;
+		String pk;
+		System.out.println("testing");
+		int size = dateList.size();
+		Key[] keys = new Key[size];
+		Long count = new Long (0);
+		Double sum = new Double(0);
+		Double startVal = new Double (0);
+		Double endVal = new Double (0);
+		GregorianCalendar cal = new GregorianCalendar();
+		Random rand = new Random();
+		long randomNum = 0 + rand.nextInt((1000000 - 0) + 1);
+		Key key = new Key("test", "summary", randomNum);
+		for (int i = 0; i<size; i++) {
+			long token = dateList.get(i);
+			pk = ticker+token;
+			keys[i] = new Key("test", "timeseries", pk);
+			cal.setTimeInMillis(token);
+			String formattedDate = dateOp.dateFormatter(cal.getTime());
+			Record record = client.operate(wPolicy, keys[i], 
+					MapOperation.getByRank("stock", -1, MapReturnType.VALUE),
+					MapOperation.getByRank("stock", -1, MapReturnType.INDEX),
+					MapOperation.getByRank("stock", 0, MapReturnType.VALUE),
+					MapOperation.getByRank("stock", 0, MapReturnType.INDEX),
+					MapOperation.getByIndex("stock", 0, MapReturnType.VALUE),
+					MapOperation.getByIndex("stock", -1, MapReturnType.VALUE),
+					Operation.get("sum"),
+					MapOperation.size("stock"));
+			if (record != null) {
+					ArrayList<Double> outList= (ArrayList<Double>) record.getList("stock");
+					sum = sum+(Double) record.getValue("sum");
+					Object countTemp = outList.get(6);
+					count = count+(Long)countTemp;
+					if (!firstRec) {
+						startVal = outList.get(4);
+						firstRec = true;
+					}
+					endVal = outList.get(5);
+					Record recMax = client.operate(wPolicy, key, 
+							MapOperation.put(mPolicy, "max", 
+									Value.get(pk), Value.get(outList.get(0))),
+							MapOperation.put(mPolicy, "min", 
+									Value.get(pk), Value.get(outList.get(2))));
+//					Record recMin = client.operate(wPolicy, key, 
+//							);
+					System.out.println(formattedDate+" for Stock "+ticker+
+							": MaxValue: "+Double.parseDouble(new DecimalFormat("##").format(outList.get(0)))+
+							" Index:"+outList.get(1)+
+							": MinValue: "+Double.parseDouble(new DecimalFormat("##").format(outList.get(2)))+
+							" Index:"+outList.get(3));
+			}
+		}
+			if (count>0) {
+				Record recordSummary = client.operate(wPolicy, key, 
+						MapOperation.getByRank("max", -1, MapReturnType.KEY),
+						MapOperation.getByRank("max", -1, MapReturnType.VALUE),
+						MapOperation.getByRank("min", 0, MapReturnType.KEY),
+						MapOperation.getByRank("min", 0, MapReturnType.VALUE));
+				System.out.println("****************************************");
+				System.out.println("*********** "+ticker+" Summary ***************");
+				System.out.println("To get the following report in AQL, run - select * from test.summary where pk= "+randomNum);
+				System.out.println("****************************************");
+				System.out.println("Sum: " + Double.parseDouble(new DecimalFormat("##.##").format(sum)) +
+						"\nCount: " + Double.parseDouble(new DecimalFormat("##").format(count)) +
+						"\nAverage Value of Stock for the Period: "+Double.parseDouble(new DecimalFormat("##.##").format(sum/count)));;
+				System.out.println("Starting Price: "+Double.parseDouble(new DecimalFormat("##.##").format(startVal))
+					+ "\nEnding Price: "+Double.parseDouble(new DecimalFormat("##.##").format(endVal)));
+				ArrayList<Double> summaryList= (ArrayList<Double>) recordSummary.getList("max");;
+				System.out.println("Maximum Price on "+summaryList.get(0) +" of Stock Price: "+summaryList.get(1));
+				summaryList= (ArrayList<Double>) recordSummary.getList("min");;
+				System.out.println("Minimum Price on "+summaryList.get(0) +" of Stock Price: "+summaryList.get(1));
+				System.out.println("****************************************");
+			}
+		
 	}
 	
 	private void retrieveResult(String ticker2, Date startDate, Date endDate) throws ParseException {
@@ -249,9 +336,9 @@ public class TimeSeriesManipulator {
 					endVal = outList.get(5);
 					Record recMax = client.operate(wPolicy, key, 
 							MapOperation.put(mPolicy, "max", 
-									Value.get(formattedDate), Value.get(outList.get(0))),
+									Value.get(pk), Value.get(outList.get(0))),
 							MapOperation.put(mPolicy, "min", 
-									Value.get(formattedDate), Value.get(outList.get(2))));
+									Value.get(pk), Value.get(outList.get(2))));
 //					Record recMin = client.operate(wPolicy, key, 
 //							);
 					System.out.println(formattedDate+" for Stock "+ticker+

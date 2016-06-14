@@ -255,9 +255,9 @@ public class TimeSeriesManipulator {
 					endVal = outList.get(5);
 					Record recMax = client.operate(wPolicy, key, 
 							MapOperation.put(mPolicy, "max", 
-									Value.get(pk), Value.get(outList.get(0))),
+									Value.get(formattedDate), Value.get(outList.get(0))),
 							MapOperation.put(mPolicy, "min", 
-									Value.get(pk), Value.get(outList.get(2))));
+									Value.get(formattedDate), Value.get(outList.get(2))));
 					System.out.println("Reading Data for " + formattedDate + " with Primary Key: " + pk +
 							": MaxValue: "+Double.parseDouble(new DecimalFormat("##").format(outList.get(0)))+
 							" Index:"+outList.get(1)+
@@ -265,31 +265,10 @@ public class TimeSeriesManipulator {
 							" Index:"+outList.get(3));
 			}
 		}
-			if (count>0) {
-				Record recordSummary = client.operate(wPolicy, key, 
-						MapOperation.getByRank("max", -1, MapReturnType.KEY),
-						MapOperation.getByRank("max", -1, MapReturnType.VALUE),
-						MapOperation.getByRank("min", 0, MapReturnType.KEY),
-						MapOperation.getByRank("min", 0, MapReturnType.VALUE));
-				System.out.println("****************************************");
-				System.out.println("*********** "+ticker+" Summary ***************");
-				System.out.println("To get the following report in AQL, run - select * from test.summary where pk= "+randomNum);
-				System.out.println("****************************************");
-				System.out.println("Sum: " + Double.parseDouble(new DecimalFormat("##.##").format(sum)) +
-						"\nCount: " + Double.parseDouble(new DecimalFormat("##").format(count)) +
-						"\nAverage Value of Stock for the Period: "+Double.parseDouble(new DecimalFormat("##.##").format(sum/count)));;
-				System.out.println("Starting Price: "+Double.parseDouble(new DecimalFormat("##.##").format(startVal))
-					+ "\nEnding Price: "+Double.parseDouble(new DecimalFormat("##.##").format(endVal)));
-				ArrayList<Double> summaryList= (ArrayList<Double>) recordSummary.getList("max");;
-				System.out.println("Maximum Price on "+summaryList.get(0) +" of Stock Price: "+summaryList.get(1));
-				summaryList= (ArrayList<Double>) recordSummary.getList("min");;
-				System.out.println("Minimum Price on "+summaryList.get(0) +" of Stock Price: "+summaryList.get(1));
-				System.out.println("****************************************");
-			}
-		
+		summaryPrint(key, sum, count, startVal, endVal, randomNum);		
 	}
 	
-	private void retrieveResult(String ticker2, Date startDate, Date endDate) throws ParseException {
+	private void retrieveResult(String ticker, Date startDate, Date endDate) throws ParseException {
 		// TODO Auto-generated method stub
 		Record[] records;
 		String pk;
@@ -334,9 +313,9 @@ public class TimeSeriesManipulator {
 					endVal = outList.get(5);
 					Record recMax = client.operate(wPolicy, key, 
 							MapOperation.put(mPolicy, "max", 
-									Value.get(pk), Value.get(outList.get(0))),
+									Value.get(formattedDate), Value.get(outList.get(0))),
 							MapOperation.put(mPolicy, "min", 
-									Value.get(pk), Value.get(outList.get(2))));
+									Value.get(formattedDate), Value.get(outList.get(2))));
 					System.out.println("Reading Data for " + formattedDate + " with Primary Key: " + pk +
 							": MaxValue: "+Double.parseDouble(new DecimalFormat("##").format(outList.get(0)))+
 							" Index:"+outList.get(1)+
@@ -346,8 +325,12 @@ public class TimeSeriesManipulator {
 			date = dateOp.addDate(date);
 			i++;
 		}
-		if (count>0) {
-			Record record = client.operate(wPolicy, key, 
+		summaryPrint(key, sum, count, startVal, endVal, randomNum);	
+	}
+	
+	private void summaryPrint (Key key, Double sum, Long count, Double startVal, Double endVal, long randomNum) {
+		if (count >0) {
+			Record recordSummary = client.operate(wPolicy, key, 
 					MapOperation.getByRank("max", -1, MapReturnType.KEY),
 					MapOperation.getByRank("max", -1, MapReturnType.VALUE),
 					MapOperation.getByRank("min", 0, MapReturnType.KEY),
@@ -361,11 +344,14 @@ public class TimeSeriesManipulator {
 					"\nAverage Value of Stock for the Period: "+Double.parseDouble(new DecimalFormat("##.##").format(sum/count)));;
 			System.out.println("Starting Price: "+Double.parseDouble(new DecimalFormat("##.##").format(startVal))
 				+ "\nEnding Price: "+Double.parseDouble(new DecimalFormat("##.##").format(endVal)));
-			ArrayList<Double> summaryList= (ArrayList<Double>) record.getList("max");;
+			ArrayList<Double> summaryList= (ArrayList<Double>) recordSummary.getList("max");;
 			System.out.println("Maximum Price on "+summaryList.get(0) +" of Stock Price: "+summaryList.get(1));
-			summaryList= (ArrayList<Double>) record.getList("min");;
+			summaryList= (ArrayList<Double>) recordSummary.getList("min");;
 			System.out.println("Minimum Price on "+summaryList.get(0) +" of Stock Price: "+summaryList.get(1));
 			System.out.println("****************************************");
+		}
+		else {
+			System.out.println("No data in the Database, please load using the option -o L");
 		}
 	}
 

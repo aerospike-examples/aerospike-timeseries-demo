@@ -34,7 +34,7 @@ public class DateOperator {
 		this.cal = GregorianCalendar.getInstance();
 		int x = new Integer(days).intValue();
 		Calendar tempCal = GregorianCalendar.getInstance();
-		int y=1;
+		int y=0;
 		int count = 0;
 		while (y<x) {
 			tempCal.add(Calendar.DAY_OF_YEAR, -1);
@@ -42,7 +42,8 @@ public class DateOperator {
 	            ++count;
 
 	         }
-			y++;
+			else y++;
+
 		}
 		y=x+count;
 		cal.add( Calendar.DAY_OF_YEAR, -y);

@@ -177,6 +177,7 @@ public class TimeSeriesManipulator {
 		Calendar endCal = Calendar.getInstance();
 		int count =0;
 		if (this.operation.contains("R")) {
+			//if (this.startString.equals(null) && this.endString.equals(null)) {
 			if (this.operation.contains("L")) {
 				count++;
 				this.retrieveResult(this.ticker, this.dateList);
@@ -258,11 +259,13 @@ public class TimeSeriesManipulator {
 									Value.get(formattedDate), Value.get(outList.get(0))),
 							MapOperation.put(mPolicy, "min", 
 									Value.get(formattedDate), Value.get(outList.get(2))));
+					String maxIndex = dateOp.getTimeStamp(outList.get(1));
+					String minIndex = dateOp.getTimeStamp(outList.get(3));
 					System.out.println("Reading Data for " + formattedDate + " with Primary Key: " + pk +
-							": MaxValue: "+Double.parseDouble(new DecimalFormat("##").format(outList.get(0)))+
-							" Index:"+outList.get(1)+
-							": MinValue: "+Double.parseDouble(new DecimalFormat("##").format(outList.get(2)))+
-							" Index:"+outList.get(3));
+							"\n\t: MaxValue: "+Double.parseDouble(new DecimalFormat("##.##").format(outList.get(0)))+
+							" Time of Day: "+maxIndex+
+							"\n\t: MinValue: "+Double.parseDouble(new DecimalFormat("##.##").format(outList.get(2)))+
+							" Time of Day: "+minIndex);
 			}
 		}
 		summaryPrint(key, sum, count, startVal, endVal, randomNum);		
@@ -316,11 +319,13 @@ public class TimeSeriesManipulator {
 									Value.get(formattedDate), Value.get(outList.get(0))),
 							MapOperation.put(mPolicy, "min", 
 									Value.get(formattedDate), Value.get(outList.get(2))));
+					String maxIndex = dateOp.getTimeStamp(outList.get(1));
+					String minIndex = dateOp.getTimeStamp(outList.get(3));
 					System.out.println("Reading Data for " + formattedDate + " with Primary Key: " + pk +
-							": MaxValue: "+Double.parseDouble(new DecimalFormat("##").format(outList.get(0)))+
-							" Index:"+outList.get(1)+
-							": MinValue: "+Double.parseDouble(new DecimalFormat("##").format(outList.get(2)))+
-							" Index:"+outList.get(3));
+							"\n\t: MaxValue: "+Double.parseDouble(new DecimalFormat("##.##").format(outList.get(0)))+
+							" Time of Day: "+maxIndex+
+							"\n\t: MinValue: "+Double.parseDouble(new DecimalFormat("##.##").format(outList.get(2)))+
+							" Time of Day: "+minIndex);
 				}
 			date = dateOp.addDate(date);
 			i++;
@@ -345,9 +350,11 @@ public class TimeSeriesManipulator {
 			System.out.println("Starting Price: "+Double.parseDouble(new DecimalFormat("##.##").format(startVal))
 				+ "\nEnding Price: "+Double.parseDouble(new DecimalFormat("##.##").format(endVal)));
 			ArrayList<Double> summaryList= (ArrayList<Double>) recordSummary.getList("max");;
-			System.out.println("Maximum Price on "+summaryList.get(0) +" of Stock Price: "+summaryList.get(1));
+			System.out.println("Maximum Price on "+summaryList.get(0) +" of Stock Price: "+
+					Double.parseDouble(new DecimalFormat("##.##").format(summaryList.get(1))));
 			summaryList= (ArrayList<Double>) recordSummary.getList("min");;
-			System.out.println("Minimum Price on "+summaryList.get(0) +" of Stock Price: "+summaryList.get(1));
+			System.out.println("Minimum Price on "+summaryList.get(0) +" of Stock Price: "+
+					Double.parseDouble(new DecimalFormat("##.##").format(summaryList.get(1))));
 			System.out.println("****************************************");
 		}
 		else {
@@ -385,10 +392,14 @@ public class TimeSeriesManipulator {
 
 			String days = cl.getOptionValue("d");
 			DateOperator dateOperator = new DateOperator();
-			String prevDate = dateOperator.getPrevDate(days);
-			String currentDate = dateOperator.getCurrentDate();
-			String startDate = cl.getOptionValue("s", prevDate);
-			String endDate = cl.getOptionValue("e", currentDate);
+			String prevDate, currentDate;
+			if (days != null) 
+				prevDate = dateOperator.getPrevDate(days);
+			else 
+				prevDate = dateOperator.getPrevDate("100");
+				currentDate = dateOperator.getCurrentDate();
+				String startDate = cl.getOptionValue("s", prevDate);
+				String endDate = cl.getOptionValue("e", currentDate);
 			if (cl.hasOption("l")) {
 				formatter.printHelp("java -jar target/AeroTimeSeries-1.0.jar", header, options, null, true);
 				System.exit(0);

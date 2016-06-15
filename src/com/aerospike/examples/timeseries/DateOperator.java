@@ -33,24 +33,32 @@ public class DateOperator {
 	public String getPrevDate (String days) throws ParseException {
 		this.cal = GregorianCalendar.getInstance();
 		int x = new Integer(days).intValue();
-		Calendar tempCal = GregorianCalendar.getInstance();
-		int y=0;
-		int count = 0;
-		while (y<x) {
-			tempCal.add(Calendar.DAY_OF_YEAR, -1);
-			if(isWeekEnd(tempCal.get(Calendar.DAY_OF_WEEK))) {
-	            ++count;
-
-	         }
-			else y++;
-
-		}
-		y=x+count;
-		cal.add( Calendar.DAY_OF_YEAR, -y);
+		x--;
+		this.cal.add(Calendar.DAY_OF_YEAR, -x);
 	    SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy");
 	    String date = df.format(cal.getTime());
 		return date;
+//		Calendar tempCal = GregorianCalendar.getInstance();
+//		int y=0;
+//		int count = 0;
+//		while (y<x) {
+//			tempCal.add(Calendar.DAY_OF_YEAR, -1);
+//			if(isWeekEnd(tempCal.get(Calendar.DAY_OF_WEEK))) {
+//	            ++count;
+//
+//	         }
+//			else y++;
+//			System.out.println("y:"+y);
+//			System.out.println("count:"+count);
+//		}
+//		y=x+count;
+//		y--;
+//		cal.add( Calendar.DAY_OF_YEAR, -y);
+//	    SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+//	    String date = df.format(cal.getTime());
+//		return date;
 	}
+	
 	public static boolean isWeekEnd(int dayOfWeek) {
 	    return ((dayOfWeek == Calendar.SATURDAY) || (dayOfWeek == Calendar.SUNDAY));
 	}
@@ -82,5 +90,15 @@ public class DateOperator {
 	    long diff = date2.getTime() - date1.getTime();
 	    long diffDays = diff / (24 * 60 * 60 * 1000)+1;
 		return diffDays;
+	}
+	public String getTimeStamp (Object index) {
+		long hours = 9+((Long)index-1)/60;
+		long minutes = 30 + ((Long)index-1)%60;
+		if (minutes>59) {
+			hours++;
+			minutes = minutes -60;
+		}
+		String result = ""+hours+":"+minutes;
+		return result;
 	}
 }

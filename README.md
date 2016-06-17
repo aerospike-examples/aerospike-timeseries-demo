@@ -85,7 +85,7 @@ Reading Data for 15/06/2016 with Primary Key: CSCO1465929000000
 Overall summary information for each stock across the time period that includes average value of the stock, Starting Price, Ending Price, Maximum Price and the Mimimum Price for the period.
 ```bash
 *********** CSCO Summary ***************
-To get the following report in AQL, run - select * from test.tickersummary where pk= 209516
+To get the following report in AQL, run - select * from test.tickersummary where pk= 209192
 ****************************************
 Sum: 22401.81
 Count: 782.0
@@ -100,12 +100,10 @@ Minimum Price on 16/06/2016 of Stock Price: 28.39
 Top Performing Stocks in the period based on stock ticker and period requested
 ```bash
 *********** Top Performing Stocks ***************
-To get the following report in AQL, run - select * from test.overallsummary where pk= 16595
+To get the following report in AQL, run - select * from test.overallsummary where pk= 608490
 ****************************************
 1:  AAPL with net position: 0.84
 2:  IBM with net position: 0.77
 3:  CSCO with net position: 0.23
-4:  MSFT with net position: 0.18
-5:  ORCL with net position: 0.13
 ****************************************
 ```

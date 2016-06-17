@@ -42,21 +42,21 @@ This is a runnable jar complete with all the dependencies packaged.
 
 To load data, use this command:
 ```bash
-java -jar target/AeroTimeSeries-1.0.jar -o L -t AAPL -d 10 -h 127.0.0.1
+java -jar target/AeroTimeSeries-1.0.jar -o L -t AAPL,IBM -d 10 -h 127.0.0.1
 ```
-This would connect to Google Finance and download data (one-minute time frame) of the last 10 days for the Stock Ticker of Apple. In case there is no internet connection available, one can manually download the data from Google Finance (http://www.google.com/finance/getprices?i=[PERIOD]&p=[DAYS]d&f=d,o,h,l,c,v&df=cpct&q=[TICKER]) and populate the file stocktick.txt without specifying the -d option
+This would connect to Google Finance and download data (one-minute time frame) of the last 10 days for the Stock Ticker of Apple and IBM. In case there is no internet connection available, one can manually download the data from Google Finance (http://www.google.com/finance/getprices?i=[PERIOD]&p=[DAYS]d&f=d,o,h,l,c,v&df=cpct&q=[TICKER]) and populate the file stocktick.txt without specifying the -d option
 
 To read data, use this command:
 ```bash
-java -jar target/AeroTimeSeries-1.0.jar -o R -t AAPL -h 127.0.0.1 -s 28/12/2015 -e 30/12/2015
+java -jar target/AeroTimeSeries-1.0.jar -o R -t AAPL,IBM,ORCL,MSFT,CSCO -h 127.0.0.1 -s 28/12/2015 -e 30/12/2015
 ```
-This would retrieve the stock ticker data of Apple stored in Aerospike for the time period mentioned. The start date and end date is to be specified as dd/MM/yyyy. Alternatively, with -d and -o R, the tool would retrieve data for the last n days that is specified. For example, to load and read data for the last 20 days,
+This would retrieve the stock ticker data of Apple, IBM, Oracle, Microsoft and Cisco stored in Aerospike for the time period mentioned. The start date and end date is to be specified as dd/MM/yyyy. Alternatively, with -d and -o R, the tool would retrieve data for the last n days that is specified. For example, to load and read data for the last 20 days,
 
 To both load and then read data, use this command:
 ```bash
-java -jar target/AeroTimeSeries-1.0.jar -o LR -t AAPL -h 127.0.0.1 -d 10
+java -jar target/AeroTimeSeries-1.0.jar -o LR -t AAPL,IBM,ORCL,MSFT,CSCO -h 127.0.0.1 -d 10
 ```
-In this case, the last 10 days of data is loaded in to Aerospike and then summary data is retrieved based on the same time-period.
+In this case, the last 10 days of data is loaded in to Aerospike for each stock ticker and then summary data is retrieved based on the same time-period.
 
 ###Options
 ```bash
@@ -70,6 +70,6 @@ In this case, the last 10 days of data is loaded in to Aerospike and then summar
 -t,--ticker <arg>   Ticker (default: AAPL)
 ```
 ###Output
-Daily summary information (Maximum Price, corresponding time of the day, Mimimum Price and corresponding time of the day) of the stock for the period.
+Daily summary information (Maximum Price, corresponding time of the day, Mimimum Price and corresponding time of the day) of all the stocks for the period.
 
-Overall summary information that includes average value of the stock for the period, Starting Price, Ending Price, Maximum Price and the Mimimum Price for the entire period.
+Overall summary information for each stock across the time period that includes average value of the stock, Starting Price, Ending Price, Maximum Price and the Mimimum Price for the period.

@@ -230,7 +230,7 @@ public class TimeSeriesManipulator {
 
 			
 		}
-		if (count==0) System.out.println("Invalid Operation. Use L or R");
+		if (this.operation.contains("R") && count==0) System.out.println("Invalid Operation. Use L or R");
 
 	}
 	
@@ -431,55 +431,52 @@ public class TimeSeriesManipulator {
 	}
 
 	private void summaryPrint (Long count, Key summaryKey, long overallRndNum, int numOfStocks) {
-		if (count>0) {	
-			if (numOfStocks >= 5) {
-				Record recordSummary = client.operate(wPolicy, summaryKey, 
+		try {
+			if (count>0) {	
+				if (numOfStocks >= 5) {
+					Record recordSummary = client.operate(wPolicy, summaryKey, 
+								MapOperation.getByRank("difference", -1, MapReturnType.KEY),
+								MapOperation.getByRank("difference", -1, MapReturnType.VALUE),
+								MapOperation.getByRank("difference", -2, MapReturnType.KEY),
+								MapOperation.getByRank("difference", -2, MapReturnType.VALUE),
+								MapOperation.getByRank("difference", -3, MapReturnType.KEY),
+								MapOperation.getByRank("difference", -3, MapReturnType.VALUE)
+								);
+					System.out.println("****************************************");
+					System.out.println("*********** Top Performing Stocks ***************");
+					System.out.println("To get the following report in AQL, run - select * from test.overallsummary where pk= "+overallRndNum);
+					System.out.println("****************************************");
+					ArrayList<Double> summaryList= (ArrayList<Double>) recordSummary.getList("difference");;
+					System.out.println("1:  "+summaryList.get(0) +" with net position: "+
+							Double.parseDouble(new DecimalFormat("##.##").format(summaryList.get(1))));
+					System.out.println("2:  "+summaryList.get(2) +" with net position: "+
+							Double.parseDouble(new DecimalFormat("##.##").format(summaryList.get(3))));
+					System.out.println("3:  "+summaryList.get(4) +" with net position: "+
+							Double.parseDouble(new DecimalFormat("##.##").format(summaryList.get(5))));
+					System.out.println("****************************************");
+				} 
+				else {
+					Record recordSummary = client.operate(wPolicy, summaryKey, 
 							MapOperation.getByRank("difference", -1, MapReturnType.KEY),
 							MapOperation.getByRank("difference", -1, MapReturnType.VALUE),
-							MapOperation.getByRank("difference", -2, MapReturnType.KEY),
-							MapOperation.getByRank("difference", -2, MapReturnType.VALUE),
-							MapOperation.getByRank("difference", -3, MapReturnType.KEY),
-							MapOperation.getByRank("difference", -3, MapReturnType.VALUE),
-							MapOperation.getByRank("difference", -4, MapReturnType.KEY),
-							MapOperation.getByRank("difference", -4, MapReturnType.VALUE),
-							MapOperation.getByRank("difference", -5, MapReturnType.KEY),
-							MapOperation.getByRank("difference", -5, MapReturnType.VALUE)
+							MapOperation.getByRank("difference", 0, MapReturnType.KEY),
+							MapOperation.getByRank("difference", 0, MapReturnType.VALUE)
 							);
-				System.out.println("****************************************");
-				System.out.println("*********** Top Performing Stocks ***************");
-				System.out.println("To get the following report in AQL, run - select * from test.overallsummary where pk= "+overallRndNum);
-				System.out.println("****************************************");
-				ArrayList<Double> summaryList= (ArrayList<Double>) recordSummary.getList("difference");;
-				System.out.println("1:  "+summaryList.get(0) +" with net position: "+
-						Double.parseDouble(new DecimalFormat("##.##").format(summaryList.get(1))));
-				System.out.println("2:  "+summaryList.get(2) +" with net position: "+
-						Double.parseDouble(new DecimalFormat("##.##").format(summaryList.get(3))));
-				System.out.println("3:  "+summaryList.get(4) +" with net position: "+
-						Double.parseDouble(new DecimalFormat("##.##").format(summaryList.get(5))));
-				System.out.println("4:  "+summaryList.get(6) +" with net position: "+
-						Double.parseDouble(new DecimalFormat("##.##").format(summaryList.get(7))));
-				System.out.println("5:  "+summaryList.get(8) +" with net position: "+
-						Double.parseDouble(new DecimalFormat("##.##").format(summaryList.get(9))));
-				System.out.println("****************************************");
-			} 
-			else {
-				Record recordSummary = client.operate(wPolicy, summaryKey, 
-						MapOperation.getByRank("difference", -1, MapReturnType.KEY),
-						MapOperation.getByRank("difference", -1, MapReturnType.VALUE),
-						MapOperation.getByRank("difference", 0, MapReturnType.KEY),
-						MapOperation.getByRank("difference", 0, MapReturnType.VALUE)
-						);
-				System.out.println("****************************************");
-				System.out.println("*********** Top Performing Stocks ***************");
-				System.out.println("To get the following report in AQL, run - select * from test.overallsummary where pk= "+overallRndNum);
-				System.out.println("****************************************");
-				ArrayList<Double> summaryList= (ArrayList<Double>) recordSummary.getList("difference");;
-				System.out.println("Best Performing Stock:  "+summaryList.get(0) +" with net position: "+
-						Double.parseDouble(new DecimalFormat("##.##").format(summaryList.get(1))));
-				System.out.println("Worst Performing Stock:  "+summaryList.get(2) +" with net position: "+
-						Double.parseDouble(new DecimalFormat("##.##").format(summaryList.get(3))));
-				System.out.println("****************************************");
+					System.out.println("****************************************");
+					System.out.println("*********** Top Performing Stocks ***************");
+					System.out.println("To get the following report in AQL, run - select * from test.overallsummary where pk= "+overallRndNum);
+					System.out.println("****************************************");
+					ArrayList<Double> summaryList= (ArrayList<Double>) recordSummary.getList("difference");;
+					System.out.println("Best Performing Stock:  "+summaryList.get(0) +" with net position: "+
+							Double.parseDouble(new DecimalFormat("##.##").format(summaryList.get(1))));
+					System.out.println("Worst Performing Stock:  "+summaryList.get(2) +" with net position: "+
+							Double.parseDouble(new DecimalFormat("##.##").format(summaryList.get(3))));
+					System.out.println("****************************************");
+				}
 			}
+		} catch (Exception ie) {
+			System.out.println("Invalid Parameters");
+			ie.printStackTrace();
 		}
 	}
 

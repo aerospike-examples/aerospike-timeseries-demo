@@ -13,6 +13,7 @@ To be able to easily calculate average stock value for the day at any given poin
 
 This is how the data would look in Aerospike
 
+```bash
 aql> select * from test.timeseries where pk ='IBM1464892200000'
 
 +----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -23,6 +24,7 @@ aql> select * from test.timeseries where pk ='IBM1464892200000'
 +----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 1 row in set (0.001 secs)
+```
 
 ###How to build
 The source code for this solution is available on GitHub at https://github.com/aerospike/aerospike-timeseries-demo 

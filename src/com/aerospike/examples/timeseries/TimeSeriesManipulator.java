@@ -304,11 +304,9 @@ public class TimeSeriesManipulator {
 			}
 			summaryPrint(tsKey, sum, count, startVal, endVal, randomNum, ticker[j]);
 			double difference = endVal-startVal;
-			if (difference > 0.0) {
 				Record recSumm = client.operate(wPolicy, summaryKey, 
 					MapOperation.put(mPolicy, "difference", 
 							Value.get(ticker[j]), Value.get(difference)));
-			}
 			firstRec=false;
 		}
 		summaryPrint(count, summaryKey, overallRndNum, numTickers);
@@ -391,11 +389,9 @@ public class TimeSeriesManipulator {
 			}
 			summaryPrint(tsKey, sum, count, startVal, endVal, randomNum, ticker[j]);
 			double difference = endVal-startVal;
-			if (difference > 0.0) {
-				Record recSumm = client.operate(wPolicy, summaryKey, 
+			Record recSumm = client.operate(wPolicy, summaryKey, 
 					MapOperation.put(mPolicy, "difference", 
 							Value.get(ticker[j]), Value.get(difference)));
-			}
 			firstRec=false;
 		}
 		summaryPrint(count, summaryKey, overallRndNum, numTickers);
@@ -440,7 +436,11 @@ public class TimeSeriesManipulator {
 								MapOperation.getByRank("difference", -2, MapReturnType.KEY),
 								MapOperation.getByRank("difference", -2, MapReturnType.VALUE),
 								MapOperation.getByRank("difference", -3, MapReturnType.KEY),
-								MapOperation.getByRank("difference", -3, MapReturnType.VALUE)
+								MapOperation.getByRank("difference", -3, MapReturnType.VALUE),
+								MapOperation.getByRank("difference", -4, MapReturnType.KEY),
+								MapOperation.getByRank("difference", -4, MapReturnType.VALUE),
+								MapOperation.getByRank("difference", -5, MapReturnType.KEY),
+								MapOperation.getByRank("difference", -5, MapReturnType.VALUE)
 								);
 					System.out.println("****************************************");
 					System.out.println("*********** Top Performing Stocks ***************");
@@ -453,6 +453,10 @@ public class TimeSeriesManipulator {
 							Double.parseDouble(new DecimalFormat("##.##").format(summaryList.get(3))));
 					System.out.println("3:  "+summaryList.get(4) +" with net position: "+
 							Double.parseDouble(new DecimalFormat("##.##").format(summaryList.get(5))));
+					System.out.println("4:  "+summaryList.get(6) +" with net position: "+
+							Double.parseDouble(new DecimalFormat("##.##").format(summaryList.get(7))));
+					System.out.println("5:  "+summaryList.get(8) +" with net position: "+
+							Double.parseDouble(new DecimalFormat("##.##").format(summaryList.get(9))));
 					System.out.println("****************************************");
 				} 
 				else {

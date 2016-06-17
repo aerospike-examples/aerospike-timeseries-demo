@@ -4,7 +4,7 @@
 Storage of Tick Data in an efficient way is a very critical aspect of any Market Data Solution. Also, efficient retrieval of not just this data but also summarized data such as top stocks in the period in an efficient manner becomes very important. 
 
 ##Solution
-With the new Sorted Map API in 3.x, it is now possible to store sorted map data in Aerospike. Using this feature, in a very efficient way, it is now possible to retrieve data based on certain criteria, such as List of Top Ten Values or Portfolio Stock Position. These features add to already available features in Aerospike to store Lists and Maps.
+With the new Sorted Map API in 3.8.3, it is now possible to store sorted map data in Aerospike. Using this feature, in a very efficient way, it is now possible to retrieve data based on certain criteria, such as List of Top Ten Values or Portfolio Stock Position. These features add to already available features in Aerospike to store Lists and Maps.
 
 ###Data Model
 Specific Ticker Stock data for a day is stored in a single Aerospike record. As an example all the data in a day for a particular Ticker, such as AAPL, is stored in a single record. The next day's data for AAPL is stored in another record. The data is stored inside the record as a Sorted Map.

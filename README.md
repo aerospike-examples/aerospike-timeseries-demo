@@ -72,4 +72,40 @@ In this case, the last 10 days of data is loaded in to Aerospike for each stock 
 ###Output
 Daily summary information (Maximum Price, corresponding time of the day, Mimimum Price and corresponding time of the day) of all the stocks for the period.
 
+```bash
+****************************************
+Reading Data for 16/06/2016 with Primary Key: CSCO1466015400000
+	: MaxValue: 28.92 Time of Day: 15:44
+	: MinValue: 28.39 Time of Day: 10:38
+Reading Data for 15/06/2016 with Primary Key: CSCO1465929000000
+	: MaxValue: 28.86 Time of Day: 14:46
+	: MinValue: 28.41 Time of Day: 9:34
+****************************************
+```
 Overall summary information for each stock across the time period that includes average value of the stock, Starting Price, Ending Price, Maximum Price and the Mimimum Price for the period.
+```bash
+*********** CSCO Summary ***************
+To get the following report in AQL, run - select * from test.tickersummary where pk= 209516
+****************************************
+Sum: 22401.81
+Count: 782.0
+Average Value of Stock for the Period: 28.65
+Starting Price: 28.42
+Ending Price: 28.65
+Maximum Price on 16/06/2016 of Stock Price: 28.92
+Minimum Price on 16/06/2016 of Stock Price: 28.39
+****************************************
+```
+
+Top Performing Stocks in the period based on stock ticker and period requested
+```bash
+*********** Top Performing Stocks ***************
+To get the following report in AQL, run - select * from test.overallsummary where pk= 16595
+****************************************
+1:  AAPL with net position: 0.84
+2:  IBM with net position: 0.77
+3:  CSCO with net position: 0.23
+4:  MSFT with net position: 0.18
+5:  ORCL with net position: 0.13
+****************************************
+```

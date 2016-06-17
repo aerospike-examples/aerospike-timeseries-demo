@@ -105,5 +105,7 @@ To get the following report in AQL, run - select * from test.overallsummary wher
 1:  AAPL with net position: 0.84
 2:  IBM with net position: 0.77
 3:  CSCO with net position: 0.23
+4:  MSFT with net position: 0.18
+5:  ORCL with net position: 0.13
 ****************************************
 ```

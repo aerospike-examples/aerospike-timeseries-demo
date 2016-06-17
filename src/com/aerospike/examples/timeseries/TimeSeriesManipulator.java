@@ -12,7 +12,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Random;
+import java.util.Set;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -35,6 +38,7 @@ import com.aerospike.client.cdt.MapReturnType;
 import com.aerospike.client.cdt.MapWriteMode;
 import com.aerospike.client.policy.BatchPolicy;
 import com.aerospike.client.policy.ClientPolicy;
+import com.aerospike.client.policy.RecordExistsAction;
 import com.aerospike.client.policy.WritePolicy;
 
 public class TimeSeriesManipulator {
@@ -45,16 +49,16 @@ public class TimeSeriesManipulator {
 	private AerospikeClient client;
 	private Key key;
 	private DateOperator dateOp;
-	private String ticker;
+	private String tickerList;
 	private String startString;
 	private String endString;
 	private String operation;
 	private String days;
 	private int port;
 	private MapPolicy mPolicy;
-	private boolean firstRec;
+	private double sum=0;
 	private Parser timeParser;
-	private ArrayList<Long> dateList;
+	private Set<Long> dateList;
 
 
 	public TimeSeriesManipulator (String host, int port, String ticker, 
@@ -67,17 +71,18 @@ public class TimeSeriesManipulator {
 			hosts[i] = new Host(hostArr[i], this.port);
 		}
 		this.clientPolicy = new ClientPolicy();
+		this.wPolicy = new WritePolicy();
+
 		this.client = new AerospikeClient(clientPolicy, hosts);
 		this.batchPolicy = new BatchPolicy();
 		this.dateOp = new DateOperator();
-		this.ticker = ticker;
+		this.tickerList = ticker;
 		this.startString = startDate;
 		this.endString = endDate;
 		this.operation = operation;
 		this.days = days;
 		this.mPolicy = new MapPolicy(MapOrder.KEY_VALUE_ORDERED, MapWriteMode.CREATE_ONLY);
-		this.firstRec = false;
-		this.dateList = new ArrayList <Long> ();
+		this.dateList = new HashSet <Long> ();
 	}
 
     public BufferedReader getStocks(String days, String ticker) throws IOException {
@@ -103,10 +108,11 @@ public class TimeSeriesManipulator {
 		}
 		else index = new Integer(list[0]).intValue();
 		double stockTickVal = new Double(list[1]).doubleValue();
-		Bin sumBin = new Bin("sum", stockTickVal);
+		sum=sum+stockTickVal;
+		Bin sumBin = new Bin("sum", sum);
 		record = client.operate(wPolicy, key, 
 					MapOperation.put(mPolicy, "stock", Value.get(index), Value.get(stockTickVal)),
-					Operation.add(sumBin));
+					Operation.put(sumBin));
 		
 	}
 
@@ -115,35 +121,48 @@ public class TimeSeriesManipulator {
 		GregorianCalendar cal = new GregorianCalendar();
 		//String formattedDate = new String();
 		String[] tokens;
+		String[] ticker;
+    	if (tickerList != null) {
+    		ticker = timeParser.parse(tickerList);
+    	}
+    	else {
+    		ticker = new String[0];
+    	}
 		long token;
 		if (this.operation.contains("L")) {
 		    System.out.println("****************************************");
 		    System.out.println("Loading Data");
 		    System.out.println("****************************************");
 		    if (this.days != null) {
-				try (BufferedReader br = getStocks(this.days, this.ticker)) {
-				    String line;
-				    while ((line = br.readLine()) != null) {
-				    	if (line.startsWith("a")) {
-				    		tokens = timeParser.parse(line);
-				    		token = new Long(tokens[0].substring(1)).longValue()*1000L;
-				    		cal.setTimeInMillis(token);
-				    		//formattedDate = dateOp.dateFormatter(cal.getTime());
-				    		this.updateTimeSeries(this.ticker, cal.getTime(), line);
-				    		Date insertDate = dateOp.getDate(cal.getTime());
-				    		this.dateList.add(insertDate.getTime());
-				    	}
-				    	else if ((!line.startsWith("EXCHANGE")) && 
-				    			(!line.startsWith("MARKET")) &&
-				    					(!line.startsWith("INTERVAL"))&&
-				    							(!line.startsWith("COLUMNS")) &&
-				    									(!line.startsWith("DATA")) &&
-				    											(!line.startsWith("TIMEZONE"))) {
-				    					this.updateTimeSeries(this.ticker, cal.getTime(), line);
-		
-				    	}
-				    }
-				}
+		    	if (ticker != null) {
+		    		for (int i=0; i< ticker.length; i++) {
+		    			this.sum=0;
+						try (BufferedReader br = getStocks(this.days, ticker[i])) {
+						    String line;
+						    while ((line = br.readLine()) != null) {
+						    	if (line.startsWith("a")) {
+						    		this.sum=0;
+						    		tokens = timeParser.parse(line);
+						    		token = new Long(tokens[0].substring(1)).longValue()*1000L;
+						    		cal.setTimeInMillis(token);
+						    		//formattedDate = dateOp.dateFormatter(cal.getTime());
+						    		this.updateTimeSeries(ticker[i], cal.getTime(), line);
+						    		Date insertDate = dateOp.getDate(cal.getTime());
+						    		this.dateList.add(insertDate.getTime());
+						    	}
+						    	else if ((!line.startsWith("EXCHANGE")) && 
+						    			(!line.startsWith("MARKET")) &&
+						    					(!line.startsWith("INTERVAL"))&&
+						    							(!line.startsWith("COLUMNS")) &&
+						    									(!line.startsWith("DATA")) &&
+						    											(!line.startsWith("TIMEZONE"))) {
+						    					this.updateTimeSeries(ticker[i], cal.getTime(), line);
+				
+						    	}
+						    }
+						}
+		    		}
+		    	}
 		    }
 		    else {
 				try (BufferedReader br = new BufferedReader(new FileReader("stocktick.txt"))) {
@@ -163,7 +182,8 @@ public class TimeSeriesManipulator {
 				    							(!line.startsWith("COLUMNS")) &&
 				    									(!line.startsWith("DATA")) &&
 				    											(!line.startsWith("TIMEZONE"))) {
-				    					this.updateTimeSeries(this.ticker, cal.getTime(), line);
+				    			if (ticker != null)		
+				    				this.updateTimeSeries(ticker[0], cal.getTime(), line);
 		
 				    	}
 				    }
@@ -180,7 +200,7 @@ public class TimeSeriesManipulator {
 			//if (this.startString.equals(null) && this.endString.equals(null)) {
 			if (this.operation.contains("L")) {
 				count++;
-				this.retrieveResult(this.ticker, this.dateList);
+				this.retrieveResult(ticker, this.dateList);
 			}
 			else {
 				count++;
@@ -204,7 +224,7 @@ public class TimeSeriesManipulator {
 					System.exit(0);
 				}
 				if (!endCal.before(startCal)) 
-					this.retrieveResult(this.ticker, startCal.getTime(), endCal.getTime());	
+					this.retrieveResult(ticker, startCal.getTime(), endCal.getTime());	
 				else System.out.println("Invalid Dates. Start Date is greater than End Date");
 			}
 
@@ -214,126 +234,160 @@ public class TimeSeriesManipulator {
 
 	}
 	
-	private void retrieveResult(String ticker, ArrayList <Long> dateList) throws ParseException {
+	private void retrieveResult(String[] ticker, Set <Long> dateList) throws ParseException {
 		// TODO Auto-generated method stub
 		Record[] records;
 		String pk;
 
 		int size = dateList.size();
+		int numTickers=0;
+		if (ticker != null)
+			numTickers = ticker.length;
 		Key[] keys = new Key[size];
-		Long count = new Long (0);
-		Double sum = new Double(0);
-		Double startVal = new Double (0);
-		Double endVal = new Double (0);
+		Long count;
+		Double sum;
+		Double startVal;
+		Double endVal;
 		GregorianCalendar cal = new GregorianCalendar();
 		Random rand = new Random();
-		long randomNum = 0 + rand.nextInt((1000000 - 0) + 1);
-		Key key = new Key("test", "summary", randomNum);
-		for (int i = 0; i<size; i++) {
-			long token = dateList.get(i);
-			pk = ticker+token;
-			keys[i] = new Key("test", "timeseries", pk);
-			cal.setTimeInMillis(token);
-			String formattedDate = dateOp.dateFormatter(cal.getTime());
-			Record record = client.operate(wPolicy, keys[i], 
-					MapOperation.getByRank("stock", -1, MapReturnType.VALUE),
-					MapOperation.getByRank("stock", -1, MapReturnType.INDEX),
-					MapOperation.getByRank("stock", 0, MapReturnType.VALUE),
-					MapOperation.getByRank("stock", 0, MapReturnType.INDEX),
-					MapOperation.getByIndex("stock", 0, MapReturnType.VALUE),
-					MapOperation.getByIndex("stock", -1, MapReturnType.VALUE),
-					Operation.get("sum"),
-					MapOperation.size("stock"));
-			if (record != null) {
-					ArrayList<Double> outList= (ArrayList<Double>) record.getList("stock");
-					sum = sum+(Double) record.getValue("sum");
-					Object countTemp = outList.get(6);
-					count = count+(Long)countTemp;
-					if (!firstRec) {
-						startVal = outList.get(4);
-						firstRec = true;
-					}
-					endVal = outList.get(5);
-					Record recMax = client.operate(wPolicy, key, 
-							MapOperation.put(mPolicy, "max", 
-									Value.get(formattedDate), Value.get(outList.get(0))),
-							MapOperation.put(mPolicy, "min", 
-									Value.get(formattedDate), Value.get(outList.get(2))));
-					String maxIndex = dateOp.getTimeStamp(outList.get(1));
-					String minIndex = dateOp.getTimeStamp(outList.get(3));
-					System.out.println("Reading Data for " + formattedDate + " with Primary Key: " + pk +
-							"\n\t: MaxValue: "+Double.parseDouble(new DecimalFormat("##.##").format(outList.get(0)))+
-							" Time of Day: "+maxIndex+
-							"\n\t: MinValue: "+Double.parseDouble(new DecimalFormat("##.##").format(outList.get(2)))+
-							" Time of Day: "+minIndex);
+		long randomNum = 0;
+		randomNum = 0 + rand.nextInt((1000000 - 0) + 1);
+		Key osKey = new Key("test", "overallsummary", randomNum);
+		
+		for (int j=0; j<numTickers; j++) {
+			boolean firstRec=false;
+			count = new Long (0);
+			sum = new Double(0);
+			startVal = new Double (0);
+			endVal = new Double (0);
+			randomNum = 0 + rand.nextInt((1000000 - 0) + 1);
+			Key tsKey = new Key("test", "tickersummary", randomNum);
+			for (int i = 0; i<size; i++) {
+				Object[] dateArr = dateList.toArray();
+				Long token = (Long) dateArr[i];
+				pk = ticker[j]+token;
+				keys[i] = new Key("test", "timeseries", pk);
+				cal.setTimeInMillis(token);
+				String formattedDate = dateOp.dateFormatter(cal.getTime());
+				Record record = client.operate(wPolicy, keys[i], 
+						MapOperation.getByRank("stock", -1, MapReturnType.VALUE),
+						MapOperation.getByRank("stock", -1, MapReturnType.INDEX),
+						MapOperation.getByRank("stock", 0, MapReturnType.VALUE),
+						MapOperation.getByRank("stock", 0, MapReturnType.INDEX),
+						MapOperation.getByIndex("stock", 0, MapReturnType.VALUE),
+						MapOperation.getByIndex("stock", -1, MapReturnType.VALUE),
+						Operation.get("sum"),
+						MapOperation.size("stock"));
+				if (record != null) {
+						ArrayList<Double> outList= (ArrayList<Double>) record.getList("stock");
+						sum = sum+(Double) record.getValue("sum");
+						Object countTemp = outList.get(6);
+						count = count+(Long)countTemp;
+						if (!firstRec) {
+							startVal = outList.get(4);
+							firstRec = true;
+						}
+						endVal = outList.get(5);
+						Record recMax = client.operate(wPolicy, tsKey, 
+								MapOperation.put(mPolicy, "max", 
+										Value.get(formattedDate), Value.get(outList.get(0))),
+								MapOperation.put(mPolicy, "min", 
+										Value.get(formattedDate), Value.get(outList.get(2))));
+						String maxIndex = dateOp.getTimeStamp(outList.get(1));
+						String minIndex = dateOp.getTimeStamp(outList.get(3));
+						System.out.println("Reading Data for " + formattedDate + " with Primary Key: " + pk +
+								"\n\t: MaxValue: "+Double.parseDouble(new DecimalFormat("##.##").format(outList.get(0)))+
+								" Time of Day: "+maxIndex+
+								"\n\t: MinValue: "+Double.parseDouble(new DecimalFormat("##.##").format(outList.get(2)))+
+								" Time of Day: "+minIndex);
+				}
 			}
+			summaryPrint(tsKey, sum, count, startVal, endVal, randomNum, ticker[j]);
+			firstRec=false;
 		}
-		summaryPrint(key, sum, count, startVal, endVal, randomNum);		
+			
 	}
 	
-	private void retrieveResult(String ticker, Date startDate, Date endDate) throws ParseException {
+	private void retrieveResult(String[] ticker, Date startDate, Date endDate) throws ParseException {
 		// TODO Auto-generated method stub
 		Record[] records;
 		String pk;
 		int daySize = (int) dateOp.difference(startDate, endDate);
 		Key[] keys = new Key[daySize];
-		Date date = startDate;
-		int i=0;
+
+
+		int numTickers=0;
+		if (ticker != null)
+			numTickers = ticker.length;
 		Date printDate, insertDate;
-		Double sum = new Double(0);
-		Long count = new Long (0);
-		Double startVal = new Double (0);
-		Double endVal = new Double (0);
+		Long count;
+		Double sum;
+		Double startVal;
+		Double endVal;
 		Random rand = new Random();
-		long randomNum = 0 + rand.nextInt((1000000 - 0) + 1);
-		Key key = new Key("test", "summary", randomNum);
-		while (!date.after(endDate)) {
-			
-			insertDate = dateOp.getDate(date);
-			pk = ticker+insertDate.getTime();
-			keys[i] = new Key("test", "timeseries", pk);
-			String formattedDate = dateOp.dateFormatter(date);
-			
-			Record record = client.operate(wPolicy, keys[i], 
-					MapOperation.getByRank("stock", -1, MapReturnType.VALUE),
-					MapOperation.getByRank("stock", -1, MapReturnType.INDEX),
-					MapOperation.getByRank("stock", 0, MapReturnType.VALUE),
-					MapOperation.getByRank("stock", 0, MapReturnType.INDEX),
-					MapOperation.getByIndex("stock", 0, MapReturnType.VALUE),
-					MapOperation.getByIndex("stock", -1, MapReturnType.VALUE),
-					Operation.get("sum"),
-					MapOperation.size("stock"));
-			if (record != null)
-				{
-					ArrayList<Double> outList= (ArrayList<Double>) record.getList("stock");
-					sum = sum+(Double) record.getValue("sum");
-					Object countTemp = outList.get(6);
-					count = count+(Long)countTemp;
-					if (!firstRec) {
-						startVal = outList.get(4);
-						firstRec = true;
+		long randomNum = 0;
+		randomNum = 0 + rand.nextInt((1000000 - 0) + 1);
+		Key osKey = new Key("test", "overallsummary", randomNum);
+		
+		for (int j=0; j<numTickers; j++) {
+			Date date = startDate;
+			int i=0;
+			boolean firstRec = false;
+			count = new Long (0);
+			sum = new Double(0);
+			startVal = new Double (0);
+			endVal = new Double (0);
+			randomNum = 0 + rand.nextInt((1000000 - 0) + 1);
+			Key tsKey = new Key("test", "tickersummary", randomNum);
+			while (!date.after(endDate)) {
+				
+				insertDate = dateOp.getDate(date);
+				pk = ticker[j]+insertDate.getTime();
+				keys[i] = new Key("test", "timeseries", pk);
+				String formattedDate = dateOp.dateFormatter(date);
+				
+				Record record = client.operate(wPolicy, keys[i], 
+						MapOperation.getByRank("stock", -1, MapReturnType.VALUE),
+						MapOperation.getByRank("stock", -1, MapReturnType.INDEX),
+						MapOperation.getByRank("stock", 0, MapReturnType.VALUE),
+						MapOperation.getByRank("stock", 0, MapReturnType.INDEX),
+						MapOperation.getByIndex("stock", 0, MapReturnType.VALUE),
+						MapOperation.getByIndex("stock", -1, MapReturnType.VALUE),
+						Operation.get("sum"),
+						MapOperation.size("stock"));
+				if (record != null)
+					{
+						ArrayList<Double> outList= (ArrayList<Double>) record.getList("stock");
+						sum = sum+(Double) record.getValue("sum");
+						Object countTemp = outList.get(6);
+						count = count+(Long)countTemp;
+						if (!firstRec) {
+							startVal = outList.get(4);
+							firstRec = true;
+						}
+						endVal = outList.get(5);
+						Record recMax = client.operate(wPolicy, tsKey, 
+								MapOperation.put(mPolicy, "max", 
+										Value.get(formattedDate), Value.get(outList.get(0))),
+								MapOperation.put(mPolicy, "min", 
+										Value.get(formattedDate), Value.get(outList.get(2))));
+						String maxIndex = dateOp.getTimeStamp(outList.get(1));
+						String minIndex = dateOp.getTimeStamp(outList.get(3));
+						System.out.println("Reading Data for " + formattedDate + " with Primary Key: " + pk +
+								"\n\t: MaxValue: "+Double.parseDouble(new DecimalFormat("##.##").format(outList.get(0)))+
+								" Time of Day: "+maxIndex+
+								"\n\t: MinValue: "+Double.parseDouble(new DecimalFormat("##.##").format(outList.get(2)))+
+								" Time of Day: "+minIndex);
 					}
-					endVal = outList.get(5);
-					Record recMax = client.operate(wPolicy, key, 
-							MapOperation.put(mPolicy, "max", 
-									Value.get(formattedDate), Value.get(outList.get(0))),
-							MapOperation.put(mPolicy, "min", 
-									Value.get(formattedDate), Value.get(outList.get(2))));
-					String maxIndex = dateOp.getTimeStamp(outList.get(1));
-					String minIndex = dateOp.getTimeStamp(outList.get(3));
-					System.out.println("Reading Data for " + formattedDate + " with Primary Key: " + pk +
-							"\n\t: MaxValue: "+Double.parseDouble(new DecimalFormat("##.##").format(outList.get(0)))+
-							" Time of Day: "+maxIndex+
-							"\n\t: MinValue: "+Double.parseDouble(new DecimalFormat("##.##").format(outList.get(2)))+
-							" Time of Day: "+minIndex);
-				}
-			date = dateOp.addDate(date);
-			i++;
+				date = dateOp.addDate(date);
+				i++;
+			}
+			summaryPrint(tsKey, sum, count, startVal, endVal, randomNum, ticker[j]);
+			firstRec=false;
 		}
-		summaryPrint(key, sum, count, startVal, endVal, randomNum);	
 	}
 	
-	private void summaryPrint (Key key, Double sum, Long count, Double startVal, Double endVal, long randomNum) {
+	private void summaryPrint (Key key, Double sum, Long count, Double startVal, Double endVal, long randomNum, String ticker) {
 		if (count >0) {
 			Record recordSummary = client.operate(wPolicy, key, 
 					MapOperation.getByRank("max", -1, MapReturnType.KEY),
@@ -368,7 +422,7 @@ public class TimeSeriesManipulator {
 			Options options = new Options();
 			options.addOption("h", "host", true, "Server hostname (default: localhost)");
 			options.addOption("p", "port", true, "Server port (default: 3000)");
-			options.addOption("t", "ticker", true, "Ticker (default: AAPL)");
+			options.addOption("t", "ticker", true, "Ticker (default: AAPL,IBM,ORCL,MSFT,CSCO)");
 			options.addOption("o", "op", true, "Load or Read Data (default: R)");
 			options.addOption("s", "start", true, "Start Date for Query (format: dd/MM/yyyy)");
 			options.addOption("e", "end", true, "End Date for Query (for,at: dd/MM/yyyy)");
@@ -386,7 +440,7 @@ public class TimeSeriesManipulator {
 			
 			String host = cl.getOptionValue("h", "127.0.0.1");
 			String portString = cl.getOptionValue("p", "3000");
-			String ticker = cl.getOptionValue("t", "AAPL");
+			String tickerList = cl.getOptionValue("t", "AAPL,IBM,ORCL,MSFT,CSCO");
 			String operation = cl.getOptionValue("o", "R");
 			
 
@@ -406,7 +460,7 @@ public class TimeSeriesManipulator {
 			}
 			else {
 				int port = Integer.parseInt(portString);
-				TimeSeriesManipulator ts = new TimeSeriesManipulator(host, port, ticker, startDate, 
+				TimeSeriesManipulator ts = new TimeSeriesManipulator(host, port, tickerList, startDate, 
 									endDate, operation, days);
 				ts.run();
 			}

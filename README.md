@@ -1,13 +1,28 @@
-#How to easily build a Time-Series Application using Aerospike's API
+#Modelling Time-Series Data in Aerospike using SortedMaps
 
 ## Problem
-Storage of Tick Data in an efficient way is a very critical aspect of any Market Data Solution. Also, efficient retrieval of not just this data but also data such as top stocks in the period in an efficient manner becomes very important. 
+Storage of Tick Data in an efficient way is a very critical aspect of any Market Data Solution. Also, efficient retrieval of not just this data but also summarized data such as top stocks in the period in an efficient manner becomes very important. 
 
 ##Solution
-Aerospike has always been ideal for Low Latency and High Throughput use cases. With the new API in the 3.8.3 release of Aerospike, it is now possible to achieve the same performance goals in time-series use cases where manipulation and retrieval of data becomes very efficient.
+With the new Sorted Map API in 3.x, it is now possible to store sorted map data in Aerospike. Using this feature, in a very efficient way, it is now possible to retrieve data based on certain criteria, such as List of Top Ten Values or Portfolio Stock Position. These features add to already available features in Aerospike to store Lists and Maps.
 
-###Schema Design
-Specific Ticker Stock data for a day is stored in a single Aerospike record. As an example all the data in a day for a particular Ticker, such as AAPL, is stored in a single record. The next day's data for AAPL is stored in another record. The data is stored inside the record as a list, where the position of each incoming data point in the list, is based on it's specific time-stamp. 
+###Data Model
+Specific Ticker Stock data for a day is stored in a single Aerospike record. As an example all the data in a day for a particular Ticker, such as AAPL, is stored in a single record. The next day's data for AAPL is stored in another record. The data is stored inside the record as a Sorted Map.
+
+To be able to easily calculate average stock value for the day at any given point in time, one can create a separate bin (column) to store the sum of all inserted data points for a particular stock in that day. 
+
+This is how the data would look in Aerospike
+
+aql> select * from test.timeseries where pk ='IBM1464892200000'
+
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| stock                                                                                                                                                                                                                                                    | sum           |
+
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| MAP’{0:152.5, 1:152.525, 2:152.92, 3:152.6001, 4:152.82, 5:152.86, 6:152.703, 7:152.88, 8:152.85, 9:152.77, 10:152.81, 11:152.78, 12:152.74, 13:152.78, 14:152.74, 15:152.75, 16:152.71, 17:152.64, 18:152.5801, 19:152.64, 20:152.56, 21:152.53, 22:152.525,...}’)  | 59565.357 |
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+1 row in set (0.001 secs)
 
 ###How to build
 The source code for this solution is available on GitHub at https://github.com/aerospike/aerospike-timeseries-demo 
@@ -35,9 +50,11 @@ java -jar target/AeroTimeSeries-1.0.jar -o R -t AAPL -h 127.0.0.1 -s 28/12/2015 
 ```
 This would retrieve the stock ticker data of Apple stored in Aerospike for the time period mentioned. The start date and end date is to be specified as dd/MM/yyyy. Alternatively, with -d and -o R, the tool would retrieve data for the last n days that is specified. For example, to load and read data for the last 20 days,
 
+To both load and then read data, use this command:
 ```bash
-java -jar target/AeroTimeSeries-1.0.jar -o LR -t AAPL -h 127.0.0.1 -d 20
+java -jar target/AeroTimeSeries-1.0.jar -o LR -t AAPL -h 127.0.0.1 -d 10
 ```
+In this case, the last 10 days of data is loaded in to Aerospike and then summary data is retrieved based on the same time-period.
 
 ###Options
 ```bash
@@ -50,3 +67,7 @@ java -jar target/AeroTimeSeries-1.0.jar -o LR -t AAPL -h 127.0.0.1 -d 20
 -s,--start <arg>    Start Date for Query (format: dd/MM/yyyy)
 -t,--ticker <arg>   Ticker (default: AAPL)
 ```
+###Output
+Daily summary information (Maximum Price, corresponding time of the day, Mimimum Price and corresponding time of the day) of the stock for the period.
+
+Overall summary information that includes average value of the stock for the period, Starting Price, Ending Price, Maximum Price and the Mimimum Price for the entire period.

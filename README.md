@@ -67,7 +67,7 @@ In this case, the last 10 days of data is loaded in to Aerospike for each stock 
 -o,--op <arg>       Load or Read Data (default: R)
 -p,--port <arg>     Server port (default: 3000)
 -s,--start <arg>    Start Date for Query (format: dd/MM/yyyy)
--t,--ticker <arg>   Ticker (default: AAPL)
+-t,--ticker <arg>   Ticker (default: AAPL,IBM,ORCL,MSFT,CSCO)
 ```
 ###Output
 Daily summary information (Maximum Price, corresponding time of the day, Mimimum Price and corresponding time of the day) of all the stocks for the period.

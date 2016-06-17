@@ -244,15 +244,15 @@ public class TimeSeriesManipulator {
 		if (ticker != null)
 			numTickers = ticker.length;
 		Key[] keys = new Key[size];
-		Long count;
+		Long count= new Long (0);
 		Double sum;
 		Double startVal;
 		Double endVal;
 		GregorianCalendar cal = new GregorianCalendar();
 		Random rand = new Random();
 		long randomNum = 0;
-		randomNum = 0 + rand.nextInt((1000000 - 0) + 1);
-		Key osKey = new Key("test", "overallsummary", randomNum);
+		long overallRndNum = 0 + rand.nextInt((1000000 - 0) + 1);
+		Key summaryKey = new Key("test", "overallsummary", overallRndNum);
 		
 		for (int j=0; j<numTickers; j++) {
 			boolean firstRec=false;
@@ -303,8 +303,15 @@ public class TimeSeriesManipulator {
 				}
 			}
 			summaryPrint(tsKey, sum, count, startVal, endVal, randomNum, ticker[j]);
+			double difference = endVal-startVal;
+			if (difference > 0.0) {
+				Record recSumm = client.operate(wPolicy, summaryKey, 
+					MapOperation.put(mPolicy, "difference", 
+							Value.get(ticker[j]), Value.get(difference)));
+			}
 			firstRec=false;
 		}
+		summaryPrint(count, summaryKey, overallRndNum, numTickers);
 			
 	}
 	
@@ -320,14 +327,14 @@ public class TimeSeriesManipulator {
 		if (ticker != null)
 			numTickers = ticker.length;
 		Date printDate, insertDate;
-		Long count;
+		Long count = new Long (0);;
 		Double sum;
 		Double startVal;
 		Double endVal;
 		Random rand = new Random();
 		long randomNum = 0;
-		randomNum = 0 + rand.nextInt((1000000 - 0) + 1);
-		Key osKey = new Key("test", "overallsummary", randomNum);
+		long overallRndNum = 0 + rand.nextInt((1000000 - 0) + 1);
+		Key summaryKey = new Key("test", "overallsummary", overallRndNum);
 		
 		for (int j=0; j<numTickers; j++) {
 			Date date = startDate;
@@ -383,8 +390,15 @@ public class TimeSeriesManipulator {
 				i++;
 			}
 			summaryPrint(tsKey, sum, count, startVal, endVal, randomNum, ticker[j]);
+			double difference = endVal-startVal;
+			if (difference > 0.0) {
+				Record recSumm = client.operate(wPolicy, summaryKey, 
+					MapOperation.put(mPolicy, "difference", 
+							Value.get(ticker[j]), Value.get(difference)));
+			}
 			firstRec=false;
 		}
+		summaryPrint(count, summaryKey, overallRndNum, numTickers);
 	}
 	
 	private void summaryPrint (Key key, Double sum, Long count, Double startVal, Double endVal, long randomNum, String ticker) {
@@ -396,14 +410,14 @@ public class TimeSeriesManipulator {
 					MapOperation.getByRank("min", 0, MapReturnType.VALUE));
 			System.out.println("****************************************");
 			System.out.println("*********** "+ticker+" Summary ***************");
-			System.out.println("To get the following report in AQL, run - select * from test.summary where pk= "+randomNum);
+			System.out.println("To get the following report in AQL, run - select * from test.tickersummary where pk= "+randomNum);
 			System.out.println("****************************************");
 			System.out.println("Sum: " + Double.parseDouble(new DecimalFormat("##.##").format(sum)) +
 					"\nCount: " + Double.parseDouble(new DecimalFormat("##").format(count)) +
 					"\nAverage Value of Stock for the Period: "+Double.parseDouble(new DecimalFormat("##.##").format(sum/count)));;
 			System.out.println("Starting Price: "+Double.parseDouble(new DecimalFormat("##.##").format(startVal))
 				+ "\nEnding Price: "+Double.parseDouble(new DecimalFormat("##.##").format(endVal)));
-			ArrayList<Double> summaryList= (ArrayList<Double>) recordSummary.getList("max");;
+			ArrayList<Double> summaryList= (ArrayList<Double>) recordSummary.getList("max");
 			System.out.println("Maximum Price on "+summaryList.get(0) +" of Stock Price: "+
 					Double.parseDouble(new DecimalFormat("##.##").format(summaryList.get(1))));
 			summaryList= (ArrayList<Double>) recordSummary.getList("min");;
@@ -413,6 +427,59 @@ public class TimeSeriesManipulator {
 		}
 		else {
 			System.out.println("No data in the Database, please load using the option -o L");
+		}
+	}
+
+	private void summaryPrint (Long count, Key summaryKey, long overallRndNum, int numOfStocks) {
+		if (count>0) {	
+			if (numOfStocks >= 5) {
+				Record recordSummary = client.operate(wPolicy, summaryKey, 
+							MapOperation.getByRank("difference", -1, MapReturnType.KEY),
+							MapOperation.getByRank("difference", -1, MapReturnType.VALUE),
+							MapOperation.getByRank("difference", -2, MapReturnType.KEY),
+							MapOperation.getByRank("difference", -2, MapReturnType.VALUE),
+							MapOperation.getByRank("difference", -3, MapReturnType.KEY),
+							MapOperation.getByRank("difference", -3, MapReturnType.VALUE),
+							MapOperation.getByRank("difference", -4, MapReturnType.KEY),
+							MapOperation.getByRank("difference", -4, MapReturnType.VALUE),
+							MapOperation.getByRank("difference", -5, MapReturnType.KEY),
+							MapOperation.getByRank("difference", -5, MapReturnType.VALUE)
+							);
+				System.out.println("****************************************");
+				System.out.println("*********** Top Performing Stocks ***************");
+				System.out.println("To get the following report in AQL, run - select * from test.overallsummary where pk= "+overallRndNum);
+				System.out.println("****************************************");
+				ArrayList<Double> summaryList= (ArrayList<Double>) recordSummary.getList("difference");;
+				System.out.println("1:  "+summaryList.get(0) +" with net position: "+
+						Double.parseDouble(new DecimalFormat("##.##").format(summaryList.get(1))));
+				System.out.println("2:  "+summaryList.get(2) +" with net position: "+
+						Double.parseDouble(new DecimalFormat("##.##").format(summaryList.get(3))));
+				System.out.println("3:  "+summaryList.get(4) +" with net position: "+
+						Double.parseDouble(new DecimalFormat("##.##").format(summaryList.get(5))));
+				System.out.println("4:  "+summaryList.get(6) +" with net position: "+
+						Double.parseDouble(new DecimalFormat("##.##").format(summaryList.get(7))));
+				System.out.println("5:  "+summaryList.get(8) +" with net position: "+
+						Double.parseDouble(new DecimalFormat("##.##").format(summaryList.get(9))));
+				System.out.println("****************************************");
+			} 
+			else {
+				Record recordSummary = client.operate(wPolicy, summaryKey, 
+						MapOperation.getByRank("difference", -1, MapReturnType.KEY),
+						MapOperation.getByRank("difference", -1, MapReturnType.VALUE),
+						MapOperation.getByRank("difference", 0, MapReturnType.KEY),
+						MapOperation.getByRank("difference", 0, MapReturnType.VALUE)
+						);
+				System.out.println("****************************************");
+				System.out.println("*********** Top Performing Stocks ***************");
+				System.out.println("To get the following report in AQL, run - select * from test.overallsummary where pk= "+overallRndNum);
+				System.out.println("****************************************");
+				ArrayList<Double> summaryList= (ArrayList<Double>) recordSummary.getList("difference");;
+				System.out.println("Best Performing Stock:  "+summaryList.get(0) +" with net position: "+
+						Double.parseDouble(new DecimalFormat("##.##").format(summaryList.get(1))));
+				System.out.println("Worst Performing Stock:  "+summaryList.get(2) +" with net position: "+
+						Double.parseDouble(new DecimalFormat("##.##").format(summaryList.get(3))));
+				System.out.println("****************************************");
+			}
 		}
 	}
 

@@ -1,4 +1,4 @@
-#Modelling Time-Series Data in Aerospike using SortedMaps
+#Modelling Time-Series Data for Top Performing Stocks in Aerospike using SortedMaps
 
 ## Problem
 Storage of Tick Data in an efficient way is a very critical aspect of any Market Data Solution. Also, efficient retrieval of not just this data but also summarized data such as top stocks in the period in an efficient manner becomes very important. 

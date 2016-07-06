@@ -4,7 +4,7 @@
 Storage of Tick Data in an efficient way is a very critical aspect of any Market Data Solution. Also, efficient retrieval of not just this data but also summarized data such as top stocks in the period in an efficient manner becomes very important. 
 
 ##Solution
-With the new Sorted Map API in 3.8.3, it is now possible to store sorted map data in Aerospike. Using this feature, in a very efficient way, it is now possible to retrieve data based on certain criteria, such as List of Top Ten Values or Portfolio Stock Position. These features add to already available features in Aerospike to store Lists and Maps.
+With the new Sorted Map API in 3.8.4, it is now possible to store sorted map data in Aerospike. Using this feature, in a very efficient way, it is now possible to retrieve data based on certain criteria, such as List of Top Ten Values or Portfolio Stock Position. These features add to already available features in Aerospike to store Lists and Maps.
 
 ###Data Model
 Specific Ticker Stock data for a day is stored in a single Aerospike record. As an example all the data in a day for a particular Ticker, such as AAPL, is stored in a single record. The next day's data for AAPL is stored in another record. The data is stored inside the record as a Sorted Map.
@@ -16,12 +16,11 @@ This is how the data would look in Aerospike
 ```bash
 aql> select * from test.timeseries where pk ='IBM1464892200000'
 
-+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| stock                                                                                                                                                                                                                                                    | sum           |
-
-+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| MAP’{0:152.5, 1:152.525, 2:152.92, 3:152.6001, 4:152.82, 5:152.86, 6:152.703, 7:152.88, 8:152.85, 9:152.77, 10:152.81, 11:152.78, 12:152.74, 13:152.78, 14:152.74, 15:152.75, 16:152.71, 17:152.64, 18:152.5801, 19:152.64, 20:152.56, 21:152.53, 22:152.525,...}’)  | 59565.357 |
-+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
++----------------------------------------------------------------------------------+
+| stock                                                                | sum       |                                                                                                                                                                                                         
++----------------------------------------------------------------------------------+
+| MAP’{0:152.5, 1:152.525, 2:152.92, 3:152.6001, 4:152.82, ...}’)      | 59565.357 |
++----------------------------------------------------------------------------------+
 
 1 row in set (0.001 secs)
 ```
@@ -29,7 +28,7 @@ aql> select * from test.timeseries where pk ='IBM1464892200000'
 ###How to build
 The source code for this solution is available on GitHub at https://github.com/aerospike/aerospike-timeseries-demo 
 
-This example requires 3.8.3 release of Aerospike and a working Java development environment (Java 6 and above) including Maven (Maven 2). The Aerospike Java client will be downloaded from Maven Central as part of the build.
+This example requires 3.8.4 release of Aerospike and a working Java development environment (Java 6 and above) including Maven (Maven 2). The Aerospike Java client will be downloaded from Maven Central as part of the build.
 
 After cloning the repository, use maven to build the jar files. From the root directory of the project, issue the following command:
 ```bash
@@ -48,15 +47,15 @@ This would connect to Google Finance and download data (one-minute time frame) o
 
 To read data, use this command:
 ```bash
-java -jar target/AeroTimeSeries-1.0.jar -o R -t AAPL,IBM,ORCL,MSFT,CSCO -h 127.0.0.1 -s 28/12/2015 -e 30/12/2015
+java -jar target/AeroTimeSeries-1.0.jar -o R -t AAPL,IBM,ORCL,MSFT,CSCO -h 127.0.0.1 -s 01/07/2016 -e 05/07/2016
 ```
 This would retrieve the stock ticker data of Apple, IBM, Oracle, Microsoft and Cisco stored in Aerospike for the time period mentioned. The start date and end date is to be specified as dd/MM/yyyy. Alternatively, with -d and -o R, the tool would retrieve data for the last n days that is specified. For example, to load and read data for the last 20 days,
 
 To both load and then read data, use this command:
 ```bash
-java -jar target/AeroTimeSeries-1.0.jar -o LR -t AAPL,IBM,ORCL,MSFT,CSCO -h 127.0.0.1 -d 10
+java -jar target/AeroTimeSeries-1.0.jar -o LR -t AAPL,IBM,ORCL,MSFT,CSCO -h 127.0.0.1 -d 2
 ```
-In this case, the last 10 days of data is loaded in to Aerospike for each stock ticker and then summary data is retrieved based on the same time-period.
+In this case, the last 2 days of data is loaded in to Aerospike for each stock ticker and then summary data is retrieved based on the same time-period.
 
 ###Options
 ```bash
@@ -74,38 +73,38 @@ Daily summary information (Maximum Price, corresponding time of the day, Mimimum
 
 ```bash
 ****************************************
-Reading Data for 16/06/2016 with Primary Key: CSCO1466015400000
-	: MaxValue: 28.92 Time of Day: 15:44
-	: MinValue: 28.39 Time of Day: 10:38
-Reading Data for 15/06/2016 with Primary Key: CSCO1465929000000
-	: MaxValue: 28.86 Time of Day: 14:46
-	: MinValue: 28.41 Time of Day: 9:34
+Reading Data for 01/07/2016 with Primary Key: CSCO1467311400000
+	: MaxValue: 28.93 Time of Day: 11:18
+	: MinValue: 28.61 Time of Day: 9:33
+Reading Data for 05/07/2016 with Primary Key: CSCO1467657000000
+	: MaxValue: 28.61 Time of Day: 10:43
+	: MinValue: 28.24 Time of Day: 9:29
 ****************************************
 ```
 Overall summary information for each stock across the time period that includes average value of the stock, Starting Price, Ending Price, Maximum Price and the Mimimum Price for the period.
 ```bash
 *********** CSCO Summary ***************
-To get the following report in AQL, run - select * from test.tickersummary where pk= 209192
+To get the following report in AQL, run - select * from test.tickersummary where pk= CSCOSummary1467781064761
 ****************************************
-Sum: 22401.81
+Sum: 22358.22
 Count: 782.0
-Average Value of Stock for the Period: 28.65
-Starting Price: 28.42
-Ending Price: 28.65
-Maximum Price on 16/06/2016 of Stock Price: 28.92
-Minimum Price on 16/06/2016 of Stock Price: 28.39
+Average Value of Stock for the Period: 28.59
+Starting Price: 28.77
+Ending Price: 28.33
+Maximum Price on 01/07/2016 of Stock Price: 28.93
+Minimum Price on 05/07/2016 of Stock Price: 28.24
 ****************************************
 ```
 
 Top Performing Stocks in the period based on stock ticker and period requested
 ```bash
 *********** Top Performing Stocks ***************
-To get the following report in AQL, run - select * from test.overallsummary where pk= 608490
+To get the following report in AQL, run - select * from test.overallsummary where pk= 1467781064761
 ****************************************
-1:  AAPL with net position: 0.84
-2:  IBM with net position: 0.77
-3:  CSCO with net position: 0.23
-4:  MSFT with net position: 0.18
-5:  ORCL with net position: 0.13
+1:  MSFT with net position: 0.04
+2:  ORCL with net position: -0.31
+3:  CSCO with net position: -0.44
+4:  AAPL with net position: -0.49
+5:  IBM with net position: -0.62
 ****************************************
 ```

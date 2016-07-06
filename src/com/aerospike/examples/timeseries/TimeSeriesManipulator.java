@@ -98,7 +98,6 @@ public class TimeSeriesManipulator {
 		Record record;
 		Date insertDate = dateOp.getDate(date);
 		String pk = ticker+insertDate.getTime();
-		
 		Key key = new Key("test", "timeseries", pk);
 		String[] list = timeParser.parse (tsValue);
 		int index = 0;
@@ -174,6 +173,7 @@ public class TimeSeriesManipulator {
 				    		cal.setTimeInMillis(token);
 				    		//formattedDate = dateOp.dateFormatter(cal.getTime());
 				    		Date insertDate = dateOp.getDate(cal.getTime());
+				    		this.updateTimeSeries(ticker[0], cal.getTime(), line);
 				    		this.dateList.add(insertDate.getTime());
 				    	}
 				    	else if ((!line.startsWith("EXCHANGE")) && 
@@ -182,7 +182,7 @@ public class TimeSeriesManipulator {
 				    							(!line.startsWith("COLUMNS")) &&
 				    									(!line.startsWith("DATA")) &&
 				    											(!line.startsWith("TIMEZONE"))) {
-				    			if (ticker != null)		
+				    			if (ticker != null)	 	
 				    				this.updateTimeSeries(ticker[0], cal.getTime(), line);
 		
 				    	}

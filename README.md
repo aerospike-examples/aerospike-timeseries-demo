@@ -96,7 +96,7 @@ Minimum Price on 05/07/2016 of Stock Price: 28.24
 ****************************************
 ```
 
-Top Performing Stocks in the period based on stock ticker and period requested
+Top Performing Stocks in the period based on stock ticker and period requested. If there are less than 5 stocks that are being analysed then only the best and worst performing stocks are displayed.
 ```bash
 *********** Top Performing Stocks ***************
 To get the following report in AQL, run - select * from test.overallsummary where pk= 1467781064761

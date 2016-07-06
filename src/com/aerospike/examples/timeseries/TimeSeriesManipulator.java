@@ -249,23 +249,28 @@ public class TimeSeriesManipulator {
 		Double startVal;
 		Double endVal;
 		GregorianCalendar cal = new GregorianCalendar();
-		Random rand = new Random();
-		long randomNum = 0;
-		long overallRndNum = 0 + rand.nextInt((1000000 - 0) + 1);
-		Key summaryKey = new Key("test", "overallsummary", overallRndNum);
+//		Random rand = new Random();
+//		long randomNum = 0;
+//		long overallRndNum = 0 + rand.nextInt((1000000 - 0) + 1);
+		long currTime = GregorianCalendar.getInstance().getTimeInMillis();
 		
+		Key summaryKey = new Key("test", "overallsummary", currTime);
+		String tksummKey = null;
 		for (int j=0; j<numTickers; j++) {
 			boolean firstRec=false;
 			count = new Long (0);
 			sum = new Double(0);
 			startVal = new Double (0);
 			endVal = new Double (0);
-			randomNum = 0 + rand.nextInt((1000000 - 0) + 1);
-			Key tsKey = new Key("test", "tickersummary", randomNum);
+//			randomNum = 0 + rand.nextInt((1000000 - 0) + 1);
+			Key tsKey = null;
+			//Key tsKey = new Key("test", "tickersummary", randomNum);
 			for (int i = 0; i<size; i++) {
 				Object[] dateArr = dateList.toArray();
 				Long token = (Long) dateArr[i];
 				pk = ticker[j]+token;
+				tksummKey = ticker[j]+"Summary"+currTime;
+				tsKey = new Key("test", "tickersummary", tksummKey);
 				keys[i] = new Key("test", "timeseries", pk);
 				cal.setTimeInMillis(token);
 				String formattedDate = dateOp.dateFormatter(cal.getTime());
@@ -302,14 +307,14 @@ public class TimeSeriesManipulator {
 								" Time of Day: "+minIndex);
 				}
 			}
-			summaryPrint(tsKey, sum, count, startVal, endVal, randomNum, ticker[j]);
+			summaryPrint(tsKey, sum, count, startVal, endVal, tksummKey, ticker[j]);
 			double difference = endVal-startVal;
 				Record recSumm = client.operate(wPolicy, summaryKey, 
 					MapOperation.put(mPolicy, "difference", 
 							Value.get(ticker[j]), Value.get(difference)));
 			firstRec=false;
 		}
-		summaryPrint(count, summaryKey, overallRndNum, numTickers);
+		summaryPrint(count, summaryKey, currTime, numTickers);
 			
 	}
 	
@@ -329,10 +334,13 @@ public class TimeSeriesManipulator {
 		Double sum;
 		Double startVal;
 		Double endVal;
-		Random rand = new Random();
-		long randomNum = 0;
-		long overallRndNum = 0 + rand.nextInt((1000000 - 0) + 1);
-		Key summaryKey = new Key("test", "overallsummary", overallRndNum);
+//		Random rand = new Random();
+//		long randomNum = 0;
+//		long overallRndNum = 0 + rand.nextInt((1000000 - 0) + 1);
+		long currTime = GregorianCalendar.getInstance().getTimeInMillis();
+		
+		Key summaryKey = new Key("test", "overallsummary", currTime);
+		String tksummKey = null;
 		
 		for (int j=0; j<numTickers; j++) {
 			Date date = startDate;
@@ -342,13 +350,19 @@ public class TimeSeriesManipulator {
 			sum = new Double(0);
 			startVal = new Double (0);
 			endVal = new Double (0);
-			randomNum = 0 + rand.nextInt((1000000 - 0) + 1);
-			Key tsKey = new Key("test", "tickersummary", randomNum);
+//			randomNum = 0 + rand.nextInt((1000000 - 0) + 1);
+			Key tsKey = null;
+			//Key tsKey = new Key("test", "tickersummary", randomNum);
+
 			while (!date.after(endDate)) {
 				
 				insertDate = dateOp.getDate(date);
 				pk = ticker[j]+insertDate.getTime();
 				keys[i] = new Key("test", "timeseries", pk);
+				tksummKey = ticker[j]+"Summary"+currTime;
+				tsKey = new Key("test", "tickersummary", tksummKey);
+				keys[i] = new Key("test", "timeseries", pk);
+
 				String formattedDate = dateOp.dateFormatter(date);
 				
 				Record record = client.operate(wPolicy, keys[i], 
@@ -387,17 +401,17 @@ public class TimeSeriesManipulator {
 				date = dateOp.addDate(date);
 				i++;
 			}
-			summaryPrint(tsKey, sum, count, startVal, endVal, randomNum, ticker[j]);
+			summaryPrint(tsKey, sum, count, startVal, endVal, tksummKey, ticker[j]);
 			double difference = endVal-startVal;
 			Record recSumm = client.operate(wPolicy, summaryKey, 
 					MapOperation.put(mPolicy, "difference", 
 							Value.get(ticker[j]), Value.get(difference)));
 			firstRec=false;
 		}
-		summaryPrint(count, summaryKey, overallRndNum, numTickers);
+		summaryPrint(count, summaryKey, currTime, numTickers);
 	}
 	
-	private void summaryPrint (Key key, Double sum, Long count, Double startVal, Double endVal, long randomNum, String ticker) {
+	private void summaryPrint (Key key, Double sum, Long count, Double startVal, Double endVal, String randomNum, String ticker) {
 		if (count >0) {
 			Record recordSummary = client.operate(wPolicy, key, 
 					MapOperation.getByRank("max", -1, MapReturnType.KEY),

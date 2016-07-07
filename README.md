@@ -1,17 +1,17 @@
-#Modelling Time-Series Data for Top Performing Stocks in Aerospike using SortedMaps
+#Modelling Time-Series Data for Top-Performing Stocks in Aerospike using Sorted Maps
 
 ## Problem
 Storage of Tick Data in an efficient way is a very critical aspect of any Market Data Solution. Also, efficient retrieval of not just this data but also summarized data such as top stocks in the period in an efficient manner becomes very important. 
 
 ##Solution
-With the new Sorted Map API in 3.8.4, it is now possible to store sorted map data in Aerospike. Using this feature, in a very efficient way, it is now possible to retrieve data based on certain criteria, such as List of Top Ten Values or Portfolio Stock Position. These features add to already available features in Aerospike to store Lists and Maps.
+With the new Sorted Map API in 3.8.4, it is now possible to store sorted map data in Aerospike. Using this feature, in a very efficient way, it is now possible to retrieve data based on certain criteria, such as List of Top Ten Values or Portfolio Stock Position. The Sorted Map API adds to the existing features in Aerospike to store Lists and Maps and create Secondary Indexes on these structures.
 
 ###Data Model
-Specific Ticker Stock data for a day is stored in a single Aerospike record. As an example all the data in a day for a particular Ticker, such as AAPL, is stored in a single record. The next day's data for AAPL is stored in another record. The data is stored inside the record as a Sorted Map.
+Specific Ticker Stock data for a day is stored in a single Aerospike record. As an example, all the data in a day for a particular Ticker, such as AAPL, is stored in a single record. The next day's data for AAPL is stored in another record. The data is stored inside the record as a Sorted Map.
 
 To be able to easily calculate average stock value for the day at any given point in time, one can create a separate bin (column) to store the sum of all inserted data points for a particular stock in that day. 
 
-This is how the data would look in Aerospike
+This is how the data would look in Aerospike:
 
 ```bash
 aql> select * from test.timeseries where pk ='IBM1464892200000'
@@ -28,34 +28,34 @@ aql> select * from test.timeseries where pk ='IBM1464892200000'
 ###How to build
 The source code for this solution is available on GitHub at https://github.com/aerospike/aerospike-timeseries-demo 
 
-This example requires 3.8.4 release of Aerospike and a working Java development environment (Java 6 and above) including Maven (Maven 2). The Aerospike Java client will be downloaded from Maven Central as part of the build.
+This example requires 3.8.4 release of Aerospike and a working Java development environment (Java 6 and above), including Maven (Maven 2). The Aerospike Java client will be downloaded from Maven Central as part of the build.
 
-After cloning the repository, use maven to build the jar files. From the root directory of the project, issue the following command:
+After cloning the repository, use Maven to build the jar files. From the root directory of the project, issue the following command:
 ```bash
 mvn clean package
 ```
 A JAR file will be produced in the directory 'target': `AeroTimeSeries-1.0.jar`. It contains the code and all the dependencies.
 
 ###Running the solution
-This is a runnable jar complete with all the dependencies packaged.
+This is a runnable jar, complete with all the dependencies packaged.
 
 To load data, use this command:
 ```bash
 java -jar target/AeroTimeSeries-1.0.jar -o L -t AAPL,IBM -d 10 -h 127.0.0.1
 ```
-This would connect to Google Finance and download data (one-minute time frame) of the last 10 days for the Stock Ticker of Apple and IBM. In case there is no internet connection available, one can manually download the data from Google Finance (http://www.google.com/finance/getprices?i=[PERIOD]&p=[DAYS]d&f=d,o,h,l,c,v&df=cpct&q=[TICKER]) and populate the file stocktick.txt without specifying the -d option. In this only one stock can be analysed for the period requested for.
+This would connect to Google Finance and download data (one-minute time frame) of the last 10 days for the Stock Ticker of Apple and IBM. In case there is no internet connection available, one can manually download the data from Google Finance (http://www.google.com/finance/getprices?i=[PERIOD]&p=[DAYS]d&f=d,o,h,l,c,v&df=cpct&q=[TICKER]) and populate the file stocktick.txt without specifying the -d option. With this, only one stock can be analysed for the period requested for.
 
 To read data, use this command:
 ```bash
 java -jar target/AeroTimeSeries-1.0.jar -o R -t AAPL,IBM,ORCL,MSFT,CSCO -h 127.0.0.1 -s 01/07/2016 -e 05/07/2016
 ```
-This would retrieve the stock ticker data of Apple, IBM, Oracle, Microsoft and Cisco stored in Aerospike for the time period mentioned. The start date and end date is to be specified as dd/MM/yyyy. Alternatively, with -d and -o R, the tool would retrieve data for the last n days that is specified. For example, to load and read data for the last 20 days,
+This would retrieve the stock ticker data of Apple, IBM, Oracle, Microsoft and Cisco stored in Aerospike for the time period mentioned. The start date and end date is to be specified as dd/MM/yyyy. Alternatively, with -d and -o R, the tool would retrieve data for the last n days that is specified. 
 
 To both load and then read data, use this command:
 ```bash
 java -jar target/AeroTimeSeries-1.0.jar -o LR -t AAPL,IBM,ORCL,MSFT,CSCO -h 127.0.0.1 -d 2
 ```
-In this case, the last 2 days of data is loaded in to Aerospike for each stock ticker and then summary data is retrieved based on the same time-period.
+In this case, the last 2 days of data is loaded in to Aerospike for each stock ticker; summary data is then retrieved based on the same time period.
 
 ###Options
 ```bash
@@ -69,7 +69,11 @@ In this case, the last 2 days of data is loaded in to Aerospike for each stock t
 -t,--ticker <arg>   Ticker (default: AAPL,IBM,ORCL,MSFT,CSCO)
 ```
 ###Output
-Daily summary information (Maximum Price, corresponding time of the day, Mimimum Price and corresponding time of the day) of all the stocks for the period.
+Daily summary information (Maximum Price, corresponding time of the day, Mimimum Price and corresponding time of the day) of all the stocks for the period:
+
+Overall summary information for each stock across the time period that includes average value of the stock, Starting Price, Ending Price, Maximum Price and the Mimimum Price for the period:
+
+Top-Performing Stocks in the period based on stock ticker and period requested (if less than 5 stocks are being analysed, then only the best- and worst-performing stocks are displayed):
 
 ```bash
 ****************************************

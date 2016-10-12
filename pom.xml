@@ -70,7 +70,7 @@
 		<dependency>
 			<groupId>com.aerospike</groupId>
 			<artifactId>aerospike-client</artifactId>
-			<version>3.2.3</version>
+			<version>3.3.0</version>
 		</dependency>
 	</dependencies>
 </project>

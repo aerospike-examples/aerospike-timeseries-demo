@@ -111,23 +111,26 @@ public class TimeSeriesManipulator {
     
 	
 	public void updateTimeSeries (String ticker, Date date, String tsValue) throws ParseException {
-		Record record;
-		Date insertDate = dateOp.getDate(date);
-		String pk = ticker+insertDate.getTime();
-		Key key = new Key("test", "timeseries", pk);
-		String[] list = timeParser.parse (tsValue);
-		int index = 0;
-		if (list[0].startsWith("a")) {
-			System.out.println("Inserting Data for "+dateOp.dateFormatter(insertDate) + " with Primary Key: "+pk);
-			index = 0;
-		}
-		else index = new Integer(list[0]).intValue();
-		double stockTickVal = new Double(list[1]).doubleValue();
-		sum=sum+stockTickVal;
-		Bin sumBin = new Bin("sum", sum);
-		record = client.operate(wPolicy, key, 
+		try {
+			Record record;
+			Date insertDate = dateOp.getDate(date);
+			String pk = ticker+insertDate.getTime();
+			Key key = new Key("test", "timeseries", pk);
+			String[] list = timeParser.parse (tsValue);
+			int index = 0;
+			if (list[0].startsWith("a")) {
+				System.out.println("Inserting Data for "+dateOp.dateFormatter(insertDate) + " with Primary Key: "+pk);
+				index = 0;
+			}
+			else index = new Integer(list[0]).intValue();
+			double stockTickVal = new Double(list[1]).doubleValue();
+			sum=sum+stockTickVal;
+			Bin sumBin = new Bin("sum", sum);
+			record = client.operate(wPolicy, key, 
 					MapOperation.put(mPolicy, "stock", Value.get(index), Value.get(stockTickVal)),
 					Operation.put(sumBin));
+		} catch (AerospikeException ie) {
+		}
 		
 	}
 
